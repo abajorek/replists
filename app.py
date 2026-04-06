@@ -7,6 +7,8 @@ import streamlit as st
 import pandas as pd
 import os
 import io
+import re
+import json
 import textwrap
 
 # ---------------------------------------------------------------------------
@@ -80,6 +82,7 @@ st.markdown("""
 DATA_DIR = os.path.dirname(os.path.abspath(__file__))
 BAND_FILE = os.path.join(DATA_DIR, "WindBand_Repertoire_Database.xlsx")
 ORCH_FILE = os.path.join(DATA_DIR, "Orchestra_Repertoire_Database.xlsx")
+PAIRINGS_FILE = os.path.join(DATA_DIR, "pairings.json")
 
 BAND_DISPLAY = [
     "Title", "Composer", "Grade", "Best Bet", "MPA Confidence",
@@ -112,6 +115,56 @@ def safe_load(loader, label):
         return None, f"{label} data file not found. Place the XLSX in the app directory."
     except Exception as e:
         return None, f"Error loading {label} data: {e}"
+
+
+# ---------------------------------------------------------------------------
+# Pairings data
+# ---------------------------------------------------------------------------
+
+@st.cache_data(show_spinner=False)
+def load_pairings():
+    if not os.path.exists(PAIRINGS_FILE):
+        return None
+    with open(PAIRINGS_FILE, encoding="utf-8") as f:
+        return json.load(f)
+
+
+def _normalize_title(title: str) -> str:
+    if not title:
+        return ""
+    t = title.strip().lower()
+    t = re.sub(r"\s*\(.*?\)\s*$", "", t)
+    t = re.sub(r"[^\w\s']", " ", t)
+    return re.sub(r"\s+", " ", t).strip()
+
+
+def _normalize_composer(composer: str) -> str:
+    if not composer:
+        return ""
+    c = composer.strip().lower()
+    c = re.split(r"[/,]", c)[0].strip()
+    c = re.sub(r"[^\w\s']", " ", c)
+    return re.sub(r"\s+", " ", c).strip()
+
+
+def get_suggestions(title: str, composer: str, pairings_data: dict, limit: int = 6):
+    """Look up suggested pairings for a piece. Returns list of dicts or empty list."""
+    if not pairings_data:
+        return []
+    norm_key = f"{_normalize_title(title)}|{_normalize_composer(composer)}"
+    lookup = pairings_data.get("norm_lookup", {})
+    piece_id = lookup.get(norm_key)
+    if not piece_id:
+        # Try title-only match (less precise but catches more)
+        title_norm = _normalize_title(title)
+        for nk, pid in lookup.items():
+            if nk.startswith(title_norm + "|"):
+                piece_id = pid
+                break
+    if not piece_id:
+        return []
+    entry = pairings_data.get("pairings", {}).get(piece_id, {})
+    return entry.get("suggestions", [])[:limit]
 
 
 # ---------------------------------------------------------------------------
@@ -323,6 +376,7 @@ def main():
     # Load data
     band_df, band_err = safe_load(load_band, "Band")
     orch_df, orch_err = safe_load(load_orchestra, "Orchestra")
+    pairings_data = load_pairings()
 
     tab1, tab2, tab3 = st.tabs(["🔍 Explore Repertoire", "📋 Program Builder", "📊 Data Insights"])
 
@@ -413,6 +467,55 @@ def main():
         status_col1.markdown(f"**{len(filtered_pb):,}** pieces match  |  **{n_prog}/3** in program")
         if n_prog >= 3:
             status_col2.success("Program full!")
+
+        # --- Suggested Pairings ---
+        prog = st.session_state["program"]
+        if prog and n_prog < 3 and pairings_data:
+            all_suggestions = []
+            for p in prog:
+                sugs = get_suggestions(p.get("Title", ""), p.get("Composer", ""), pairings_data)
+                for s in sugs:
+                    # Avoid suggesting pieces already in the program
+                    prog_titles = {(_normalize_title(pp.get("Title", "")), _normalize_composer(pp.get("Composer", ""))) for pp in prog}
+                    sug_key = (s["norm_title"], s["norm_composer"])
+                    if sug_key not in prog_titles:
+                        all_suggestions.append({
+                            **s,
+                            "paired_with": p.get("Title", ""),
+                        })
+
+            if all_suggestions:
+                # Deduplicate and sort by count
+                seen = set()
+                unique_sugs = []
+                for s in sorted(all_suggestions, key=lambda x: -x["count"]):
+                    sk = (s["norm_title"], s["norm_composer"])
+                    if sk not in seen:
+                        seen.add(sk)
+                        unique_sugs.append(s)
+
+                st.markdown("---")
+                st.markdown("### Suggested Pairings")
+                st.caption("Based on UIL programming data — pieces commonly performed together.")
+
+                for i, s in enumerate(unique_sugs[:6]):
+                    sc1, sc2, sc3 = st.columns([4, 2, 1])
+                    sc1.markdown(f"**{s['title']}** — {s['composer']}")
+                    sc2.caption(f"Paired with *{s['paired_with']}* ({s['count']}× in UIL)")
+
+                    # Try to find this piece in the current database to get full metadata
+                    match = source_pb[
+                        source_pb["Title"].fillna("").str.lower().str.contains(s["norm_title"][:20], regex=False)
+                        & source_pb["Composer"].fillna("").str.lower().str.contains(s["norm_composer"][:15], regex=False)
+                    ]
+                    if not match.empty and n_prog < 3:
+                        if sc3.button("Add ＋", key=f"sug_{i}_{s['norm_title'][:10]}"):
+                            add_piece(match.iloc[0].to_dict())
+                            st.rerun()
+                    elif match.empty:
+                        sc3.caption("Not in DB")
+
+                st.markdown("---")
 
         # Piece list with add buttons
         display_limit = 80
