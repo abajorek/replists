@@ -1,6 +1,6 @@
 """
 Repertoire Database Explorer
-Colorado Mesa University — Instrumental Methods
+Repertoire Database Explorer
 """
 
 import streamlit as st
@@ -369,7 +369,7 @@ def main():
     st.markdown("""
     <div class="main-header">
         <h1>Repertoire Database Explorer</h1>
-        <p>Colorado Mesa University &middot; Instrumental Methods</p>
+        <p>Browse vetted repertoire &middot; Build adjudicated concert programs</p>
     </div>
     """, unsafe_allow_html=True)
 
