@@ -261,44 +261,22 @@ def apply_filters(df, is_band, key_prefix=""):
             df = df[df["ICD Diversity"].notna() & (df["ICD Diversity"].astype(str).str.strip() != "")]
 
     if is_band and "Categories" in df.columns:
-        # Main category selection
-        sel_main = st.sidebar.multiselect(
-            "Category",
-            list(CATEGORY_GROUPS.keys()),
-            default=[],
-            key=f"{kp}cat_main",
-        )
-        # Sub-category selection (only tags from selected main categories)
-        if sel_main:
-            available_subs = []
-            for m in sel_main:
-                available_subs.extend(CATEGORY_GROUPS[m])
-            available_subs = sorted(set(available_subs))
-            sel_subs = st.sidebar.multiselect(
-                "Sub-category",
-                available_subs,
-                default=[],
-                key=f"{kp}cat_sub",
-            )
-            # Filter: piece must contain ANY of the selected sub-categories
-            # (or any tag from selected main categories if no sub picked)
-            filter_tags = sel_subs if sel_subs else available_subs
+        all_selected_tags = []
+        for group_name, group_tags in CATEGORY_GROUPS.items():
+            # Only show tags that actually exist in current data
+            present = [t for t in group_tags if df["Categories"].fillna("").str.contains(t, regex=False).any()]
+            if present:
+                sel = st.sidebar.multiselect(
+                    group_name,
+                    present,
+                    default=[],
+                    key=f"{kp}cat_{group_name}",
+                )
+                all_selected_tags.extend(sel)
+        if all_selected_tags:
             df = df[df["Categories"].apply(
-                lambda v: any(t in str(v) for t in filter_tags) if pd.notna(v) else False
+                lambda v: any(t in str(v) for t in all_selected_tags) if pd.notna(v) else False
             )]
-
-    if is_band and "Style Tags" in df.columns:
-        tags = set()
-        for val in df["Style Tags"].dropna():
-            for t in str(val).split(";"):
-                t = t.strip()
-                if t: tags.add(t)
-        if tags:
-            sel = st.sidebar.multiselect("Style Tags", sorted(tags), default=[], key=f"{kp}Style Tags")
-            if sel:
-                df = df[df["Style Tags"].apply(
-                    lambda v: any(t in str(v) for t in sel) if pd.notna(v) else False
-                )]
 
     if not is_band and "Ensemble" in df.columns:
         ens = sorted(df["Ensemble"].dropna().unique())
