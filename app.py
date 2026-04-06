@@ -191,7 +191,7 @@ def apply_filters(df, is_band: bool, key_prefix: str = ""):
 
     # URM only
     if "ICD Diversity" in df.columns:
-        if st.sidebar.checkbox("URM composers only", key=f"{kp}urm"):
+        if st.sidebar.checkbox("Underrepresented composers only (ICD)", key=f"{kp}urm"):
             df = df[df["ICD Diversity"].notna() & (df["ICD Diversity"].astype(str).str.strip() != "")]
 
     # Band: Style Tags / Categories
@@ -298,9 +298,9 @@ def render_program_sidebar():
         for p in prog
     )
     if has_urm:
-        st.sidebar.success("Includes URM composer ✓")
+        st.sidebar.success("Includes underrepresented composer (ICD) ✓")
     else:
-        st.sidebar.warning("No URM composer — consider adding one.")
+        st.sidebar.warning("No underrepresented composer — consider adding one (ICD).")
 
     # Contrast
     all_tags = set()
@@ -351,7 +351,7 @@ def export_text(prog):
     if grades:
         lines.append(f"Grade range: {min(grades)} – {max(grades)}")
     has_urm = any(pd.notna(p.get("ICD Diversity")) and str(p.get("ICD Diversity", "")).strip() for p in prog)
-    lines.append(f"URM composer included: {'Yes' if has_urm else 'No'}")
+    lines.append(f"Underrepresented composer included (ICD): {'Yes' if has_urm else 'No'}")
     lines.append("")
     lines.append("Generated with Repertoire Database Explorer")
 
@@ -567,9 +567,9 @@ def main():
                 m1, m2, m3 = st.columns(3)
                 m1.metric("Total pieces", f"{len(band_df):,}")
                 urm_b = band_df[band_df["ICD Diversity"].notna() & (band_df["ICD Diversity"].astype(str).str.strip() != "")]
-                m2.metric("URM composers", f"{len(urm_b):,}")
+                m2.metric("Underrepresented", f"{len(urm_b):,}")
                 pct_b = len(urm_b) / len(band_df) * 100
-                m3.metric("URM %", f"{pct_b:.1f}%")
+                m3.metric("ICD %", f"{pct_b:.1f}%")
 
                 st.markdown("**Pieces by grade**")
                 gc = band_df["Grade"].value_counts().sort_index()
@@ -589,9 +589,9 @@ def main():
                 m1, m2, m3 = st.columns(3)
                 m1.metric("Total pieces", f"{len(orch_df):,}")
                 urm_o = orch_df[orch_df["ICD Diversity"].notna() & (orch_df["ICD Diversity"].astype(str).str.strip() != "")]
-                m2.metric("URM composers", f"{len(urm_o):,}")
+                m2.metric("Underrepresented", f"{len(urm_o):,}")
                 pct_o = len(urm_o) / len(orch_df) * 100
-                m3.metric("URM %", f"{pct_o:.1f}%")
+                m3.metric("ICD %", f"{pct_o:.1f}%")
 
                 st.markdown("**Pieces by grade**")
                 gc_o = orch_df["Grade"].value_counts().sort_index()
