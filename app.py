@@ -295,13 +295,13 @@ def render_piece_card(row, pairings_data, source_df, is_band, show_add=False, pr
         # Performance context
         bb = row.get("Best Bet", "")
         if pd.notna(bb) and str(bb).strip():
-            st.markdown(f"**Overall recommendation:** {bb}/100")
+            st.markdown(f"**Overall recommendation:** {float(bb):.2f}/100")
         mpa = row.get("MPA Confidence", "")
         if pd.notna(mpa) and str(mpa).strip():
-            st.markdown(f"**Festival performance strength:** {mpa}/100")
+            st.markdown(f"**Festival performance strength:** {float(mpa):.2f}/100")
         sc = row.get("Street Cred", "")
         if pd.notna(sc) and str(sc).strip():
-            st.markdown(f"**Professional endorsement:** {sc}")
+            st.markdown(f"**Professional endorsement:** {float(sc):.2f}")
         tp = row.get("Total Perfs", "")
         if pd.notna(tp) and str(tp).strip():
             st.markdown(f"**Times performed at festival:** {int(tp):,}")
