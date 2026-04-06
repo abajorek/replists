@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Using Repertoire Databases for Adjudicated Programming</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600;700&display=swap');
+
+  :root {
+    --maroon: #7B2D26;
+    --maroon-light: #A13D34;
+    --gold: #C8962E;
+    --gold-light: #F5E6C8;
+    --cream: #FDF8F0;
+    --dark: #2C2C2C;
+    --gray: #6B6B6B;
+    --light-gray: #F5F5F5;
+    --white: #FFFFFF;
+    --kagan-bg: #FFF8E7;
+    --kagan-border: #E8C84A;
+    --blue-accent: #2E5A88;
+    --teal: #2A7B6F;
+    --orange-accent: #D4722A;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    color: var(--dark);
+    background: var(--white);
+    line-height: 1.65;
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 24px 20px 60px;
+  }
+
+  /* HEADER */
+  .header {
+    text-align: center;
+    padding: 32px 20px 28px;
+    margin-bottom: 32px;
+    border-bottom: 4px solid var(--maroon);
+  }
+  .header .label {
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gray);
+    margin-bottom: 8px;
+  }
+  .header h1 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 30px;
+    color: var(--maroon);
+    margin-bottom: 6px;
+    line-height: 1.2;
+  }
+  .header .subtitle {
+    font-size: 15px;
+    color: var(--gray);
+    font-style: italic;
+  }
+  .header .course-info {
+    margin-top: 16px;
+    font-size: 13px;
+    color: var(--gray);
+  }
+
+  /* DELIVERABLE BANNER */
+  .deliverable-banner {
+    background: var(--maroon);
+    color: var(--white);
+    border-radius: 8px;
+    padding: 16px 24px;
+    margin-bottom: 32px;
+    text-align: center;
+  }
+  .deliverable-banner .due-label {
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    opacity: 0.8;
+    margin-bottom: 4px;
+  }
+  .deliverable-banner .due-text {
+    font-size: 16px;
+    font-weight: 600;
+  }
+  .deliverable-banner .due-detail {
+    font-size: 13px;
+    opacity: 0.85;
+    margin-top: 4px;
+  }
+
+  /* CATCHPHRASE BLOCKS */
+  .concept-block {
+    margin-bottom: 28px;
+  }
+  .catchphrase {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 22px;
+    color: var(--maroon);
+    font-weight: 700;
+    margin-bottom: 6px;
+    line-height: 1.3;
+  }
+  .concept-body {
+    font-size: 14px;
+    color: var(--dark);
+    padding-left: 2px;
+  }
+  .concept-body p {
+    margin-bottom: 10px;
+  }
+
+  /* SECTION DIVIDERS */
+  .section-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 36px 0 24px;
+  }
+  .section-divider .line {
+    flex: 1;
+    height: 2px;
+    background: var(--maroon);
+    opacity: 0.3;
+  }
+  .section-divider .section-label {
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--maroon);
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  /* KAGAN CARDS */
+  .kagan-card {
+    background: var(--kagan-bg);
+    border-left: 4px solid var(--gold);
+    border-radius: 0 8px 8px 0;
+    padding: 16px 20px;
+    margin-bottom: 24px;
+  }
+  .kagan-card .kagan-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 4px;
+  }
+  .kagan-card .kagan-catchphrase {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 20px;
+    color: var(--dark);
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .kagan-card .kagan-body {
+    font-size: 13px;
+    color: var(--gray);
+  }
+  .kagan-card .ensemble-use {
+    margin-top: 8px;
+    font-size: 13px;
+    color: var(--blue-accent);
+    font-style: italic;
+  }
+
+  /* DATA TABLES */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0 20px;
+    font-size: 13px;
+  }
+  .data-table th {
+    background: var(--maroon);
+    color: var(--white);
+    text-align: left;
+    padding: 8px 12px;
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+  }
+  .data-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid #E8E8E8;
+    vertical-align: top;
+  }
+  .data-table tr:nth-child(even) td {
+    background: var(--light-gray);
+  }
+  .data-table .col-name {
+    font-weight: 600;
+    color: var(--maroon);
+    white-space: nowrap;
+  }
+
+  /* SCORE BREAKDOWN */
+  .score-breakdown {
+    background: var(--cream);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 16px 0 20px;
+    border: 1px solid #E8DCC8;
+  }
+  .score-breakdown .sb-title {
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+  .score-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    padding: 3px 0;
+    border-bottom: 1px dotted #D8CDB8;
+  }
+  .score-row:last-child { border-bottom: none; }
+  .score-row .source { color: var(--dark); }
+  .score-row .pts { font-weight: 600; color: var(--maroon); text-align: right; }
+
+  /* EXAMPLE BOX */
+  .example-box {
+    background: #F0F7F5;
+    border-left: 4px solid var(--teal);
+    border-radius: 0 8px 8px 0;
+    padding: 16px 20px;
+    margin: 16px 0 24px;
+  }
+  .example-box .ex-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--teal);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+  .example-box p {
+    font-size: 13px;
+    margin-bottom: 6px;
+  }
+
+  /* ESSENTIAL QUESTIONS */
+  .eq-box {
+    background: var(--cream);
+    border: 2px solid var(--gold-light);
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin: 20px 0;
+  }
+  .eq-box .eq-label {
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+  .eq-box p {
+    font-size: 14px;
+    font-style: italic;
+    color: var(--dark);
+    margin-bottom: 6px;
+    padding-left: 16px;
+    text-indent: -16px;
+  }
+  .eq-box p::before {
+    content: '\2192\00a0';
+    color: var(--maroon);
+    font-style: normal;
+  }
+
+  /* CONTRAST GRID */
+  .contrast-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin: 16px 0;
+  }
+  .contrast-dim {
+    background: var(--light-gray);
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+  .contrast-dim strong {
+    color: var(--maroon);
+    display: block;
+    font-size: 12px;
+    margin-bottom: 2px;
+  }
+
+  /* CHECKLIST */
+  .checklist {
+    list-style: none;
+    margin: 12px 0;
+  }
+  .checklist li {
+    font-size: 14px;
+    padding: 6px 0 6px 28px;
+    position: relative;
+  }
+  .checklist li::before {
+    content: '\25A2';
+    position: absolute;
+    left: 4px;
+    color: var(--maroon);
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  /* WARNING BOX */
+  .warning-box {
+    background: #FFF5F5;
+    border-left: 4px solid var(--maroon-light);
+    border-radius: 0 8px 8px 0;
+    padding: 14px 18px;
+    margin: 16px 0;
+    font-size: 13px;
+  }
+  .warning-box .warn-label {
+    font-weight: 700;
+    color: var(--maroon-light);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+
+  /* FOOTER */
+  .footer {
+    margin-top: 48px;
+    padding-top: 20px;
+    border-top: 2px solid var(--light-gray);
+    font-size: 12px;
+    color: var(--gray);
+    text-align: center;
+  }
+  .footer .sources {
+    text-align: left;
+    margin-bottom: 16px;
+    font-size: 12px;
+    line-height: 1.7;
+  }
+  .footer .sources strong {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--dark);
+    font-size: 13px;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 600px) {
+    .header h1 { font-size: 24px; }
+    .contrast-grid { grid-template-columns: 1fr; }
+    .data-table { font-size: 12px; }
+    .data-table th, .data-table td { padding: 6px 8px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="label">Student Guide</div>
+  <h1>Using Repertoire Databases for Adjudicated Programming</h1>
+  <div class="subtitle">From Raw Data to a Concert Program That Holds Up in Front of Judges</div>
+  <div class="course-info">Colorado Mesa University &bull; Instrumental Methods</div>
+</div>
+
+<!-- DELIVERABLE BANNER -->
+<div class="deliverable-banner">
+  <div class="due-label">Due Wednesday</div>
+  <div class="due-text">Submit an Adjudicated Concert Program (Repertoire List)</div>
+  <div class="due-detail">Everything below works backward from this deliverable. Read with that in mind.</div>
+</div>
+
+<!-- ESSENTIAL QUESTIONS -->
+<div class="eq-box">
+  <div class="eq-label">Questions to Carry With You</div>
+  <p>What makes a concert program "adjudication-ready" versus just a list of pieces you like?</p>
+  <p>How do you evaluate repertoire you've never heard before?</p>
+  <p>What does a judge actually look for in program construction?</p>
+  <p>How do you balance what the data says with your own musical instincts?</p>
+</div>
+
+<!-- ══════════════════════════════ -->
+<!-- PART I: THE DESTINATION -->
+<!-- ══════════════════════════════ -->
+<div class="section-divider">
+  <div class="line"></div>
+  <div class="section-label">Part I &mdash; Where You're Going</div>
+  <div class="line"></div>
+</div>
+
+<div class="concept-block">
+  <div class="catchphrase">Start at the stage, not the library.</div>
+  <div class="concept-body">
+    <p>Before we talk about databases or data fields, you need to understand the event your program is built for. In Colorado, three organizations host adjudicated large ensemble events, and the expectations vary between them.</p>
+  </div>
+</div>
+
+<div class="concept-block">
+  <div class="catchphrase">CBA: Concert Band Festival</div>
+  <div class="concept-body">
+    <p>The Colorado Bandmasters Association runs regional and state-level concert band festivals. Ensembles perform a prepared program and receive recorded commentary from a panel of adjudicators, followed by an individualized clinic. The rating scale runs from Superior (I) through Poor (V), with "Superior with Distinction" as the top designation.</p>
+    <p>CBA maintains a <strong>Prescribed Music List (PML)</strong>. If you're programming for a CBA festival, your selections should come from or align with this list. The database tracks this directly&mdash;look for the <code>On CBA PML</code> column.</p>
+    <p>Regional festivals include a site in Grand Junction. Non-qualifying festivals exist for developing bands and second/third ensembles&mdash;so this isn't just a varsity event.</p>
+  </div>
+</div>
+
+<div class="concept-block">
+  <div class="catchphrase">Colorado ASTA: Large Group Orchestra Festival</div>
+  <div class="concept-body">
+    <p>Colorado ASTA runs regional orchestra festivals in early March and a State Festival in late April. The format: 30 minutes to warm up, 30 minutes to perform (20 minutes of music maximum), and a 30-minute clinic with a national-level clinician.</p>
+    <p>There is <strong>no prescribed list</strong>&mdash;music selection is entirely the director's choice. You need to provide four copies of each score for the adjudicators. If selected for State, you must add or change at least one piece from your regional program.</p>
+    <p>You're also required to listen to two other performing groups. This isn't optional&mdash;it's part of the educational design of the event.</p>
+  </div>
+</div>
+
+<div class="concept-block">
+  <div class="catchphrase">CMEA: The Broader Framework</div>
+  <div class="concept-body">
+    <p>The Colorado Music Educators Association hosts Solo &amp; Ensemble Festivals and supports large ensemble events statewide. A key rule across CMEA-affiliated events: <strong>art music must be performed</strong>. Pop arrangements or non-art music can result in adjudicators lowering your rating. Sight-reading may be optional at some events, but choosing not to sight-read can disqualify you from the highest rating tier.</p>
+  </div>
+</div>
+
+<div class="concept-block">
+  <div class="catchphrase">The anatomy of a good program.</div>
+  <div class="concept-body">
+    <p>Regardless of which organization you're performing for, a well-constructed adjudicated program has the same DNA:</p>
+    <p>You typically perform <strong>two to three contrasting prepared selections</strong>, possibly preceded by a warm-up piece. The word "contrasting" is doing a lot of work in that sentence. Your pieces need to differ across multiple musical dimensions:</p>
+  </div>
+  <div class="contrast-grid">
+    <div class="contrast-dim"><strong>Tempo</strong>Fast and slow. Not three ballads.</div>
+    <div class="contrast-dim"><strong>Style / Character</strong>Lyrical vs. rhythmic, legato vs. marcato.</div>
+    <div class="contrast-dim"><strong>Historical Period</strong>Don't put three 21st-century American works together.</div>
+    <div class="contrast-dim"><strong>Tonality</strong>Vary keys, modes, harmonic language.</div>
+    <div class="contrast-dim"><strong>Form</strong>Show range: ABA, theme &amp; variations, rondo, through-composed.</div>
+    <div class="contrast-dim"><strong>Cultural Context</strong>Breadth matters. Represent the repertoire.</div>
+  </div>
+  <div class="concept-body">
+    <p>Here's what matters most: <strong>adjudicators evaluate against the score, not against other ensembles.</strong> This is assessment, not competition. They're asking: did this ensemble realize what the composer wrote? Did the director select music appropriate to the ensemble's ability? A well-chosen Grade 3 program performed beautifully will outscore a poorly-executed Grade 5 program every time.</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════ -->
+<!-- PART II: THE TOOL -->
+<!-- ══════════════════════════════ -->
+<div class="section-divider">
+  <div class="line"></div>
+  <div class="section-label">Part II &mdash; Meet the Database</div>
+  <div class="line"></div>
+</div>
+
+<div class="concept-block">
+  <div class="catchphrase">Thousands of pieces. One question: which ones hold up?</div>
+  <div class="concept-body">
+    <p>You have access to two repertoire databases: one for band, one for orchestra. They aggregate real performance data and expert curation into searchable spreadsheets. They don't replace your ear or your musical judgment. They answer the question every new teacher asks: <em>where do I start?</em></p>
+  </div>
+</div>
+
+<div class="concept-block">
+  <div class="catchphrase">The Band Database</div>
+  <div class="concept-body">
+    <p>19,508 band originals plus 282 transcriptions and arrangements. Built from 37,580 Florida MPA performances (2009&ndash;2020), cross-referenced with 22 state prescribed lists and multiple professional reference sources.</p>
+    <p>Here are the columns that matter most:</p>
+  </div>
+
+  <table class="data-table">
+    <tr>
+      <th>Column</th>
+      <th>What It Tells You</th>
+    </tr>
+    <tr>
+      <td class="col-name">Best Bet (0&ndash;100)</td>
+      <td>The single best column to sort by. Composite = 60% MPA Confidence + 40% Normalized Street Cred.</td>
+    </tr>
+    <tr>
+      <td class="col-name">MPA Confidence (0&ndash;100)</td>
+      <td>How reliably this piece earns strong adjudication ratings, normalized for grade level. Blank if no MPA data.</td>
+    </tr>
+    <tr>
+      <td class="col-name">Street Cred (0&ndash;15.5)</td>
+      <td>How widely vetted this piece is across professional sources. Additive&mdash;more sources = higher score.</td>
+    </tr>
+    <tr>
+      <td class="col-name">Grade (1&ndash;6)</td>
+      <td>Difficulty level. Your program needs a spread&mdash;not everything at grade 5.</td>
+    </tr>
+    <tr>
+      <td class="col-name">Trend Direction</td>
+      <td>Is this piece improving, stable, or declining in adjudication performance over time?</td>
+    </tr>
+    <tr>
+      <td class="col-name">On CBA PML</td>
+      <td>Is it on the Colorado Bandmasters Association Prescribed Music List? Directly relevant for CBA festivals.</td>
+    </tr>
+    <tr>
+      <td class="col-name">Categories / Style Tags</td>
+      <td>Genre and style descriptors from WindRep.org. Use these to check contrast between your selections.</td>
+    </tr>
+    <tr>
+      <td class="col-name">ICD Diversity</td>
+      <td>Flags underrepresented composers per the Institute for Composer Diversity. ICD Detail shows demographics.</td>
+    </tr>
+    <tr>
+      <td class="col-name">State List Count</td>
+      <td>Number of state prescribed lists this piece appears on (out of 22). More states = more widely adopted.</td>
+    </tr>
+  </table>
+</div>
+
+<div class="score-breakdown">
+  <div class="sb-title">Street Cred &mdash; Where the Points Come From</div>
+  <div class="score-row"><span class="source">Krienes Concert Repertoire Guide (stackable per edition)</span><span class="pts">+3</span></div>
+  <div class="score-row"><span class="source">TMTP (Teaching Music Through Performance)</span><span class="pts">+3</span></div>
+  <div class="score-row"><span class="source">Director Tier 1 (Bimm / Snoeck, taught 2+ times)</span><span class="pts">+3</span></div>
+  <div class="score-row"><span class="source">BDG Common (Band Directors Guide)</span><span class="pts">+2</span></div>
+  <div class="score-row"><span class="source">ICD URM (Underrepresented composer)</span><span class="pts">+2</span></div>
+  <div class="score-row"><span class="source">CBA Prescribed Music List</span><span class="pts">+1</span></div>
+  <div class="score-row"><span class="source">BDG Proposed</span><span class="pts">+0.5</span></div>
+  <div class="score-row"><span class="source">Director Tier 2</span><span class="pts">+0.3</span></div>
+  <div class="score-row"><span class="source">Each state prescribed list (up to 22)</span><span class="pts">+0.01</span></div>
+</div>
+
+<div class="concept-block">
+  <div class="catchphrase">The Orchestra Database</div>
+  <div class="concept-body">
+    <p>3,990 entries cross-referenced from TMTP Orchestra (Vols 1&ndash;4), SCSBOA (Southern California), PMEA (Pennsylvania), and the Institute for Composer Diversity.</p>
+    <p>Key difference: <strong>no MPA adjudication data.</strong> The scoring is entirely source-based, so the scale is simpler.</p>
+  </div>
+
+  <table class="data-table">
+    <tr>
+      <th>Column</th>
+      <th>What It Tells You</th>
+    </tr>
+    <tr>
+      <td class="col-name">Best Bet (0&ndash;100)</td>
+      <td>Normalized Street Cred. Best single column to sort for repertoire selection.</td>
+    </tr>
+    <tr>
+      <td class="col-name">Street Cred (0&ndash;7)</td>
+      <td>TMTP +3, ICD URM +2, SCSBOA +1, PMEA +1.</td>
+    </tr>
+    <tr>
+      <td class="col-name">Ensemble</td>
+      <td>String, Full, or both. Check this&mdash;your string orchestra can't play a full orchestra piece.</td>
+    </tr>
+    <tr>
+      <td class="col-name">Grade (0.5&ndash;6)</td>
+      <td>Grade levels vary across sources. SCSBOA uses 0.5&ndash;5; PMEA and TMTP use 1&ndash;6.</td>
+    </tr>
+    <tr>
+      <td class="col-name">On TMTP / TMTP Vol</td>
+      <td>Presence in Teaching Music Through Performance in Orchestra&mdash;the go-to pedagogical reference.</td>
+    </tr>
+    <tr>
+      <td class="col-name">ICD Diversity</td>
+      <td>Underrepresented composer flag. ICD Detail provides demographic categories.</td>
+    </tr>
+  </table>
+</div>
+
+<!-- EXAMPLE: READING AN ENTRY -->
+<div class="example-box">
+  <div class="ex-label">Reading an Entry &mdash; Shenandoah (Ticheli)</div>
+  <p><strong>Best Bet: 97.4</strong> &mdash; Near the top of the entire database. This piece is about as safe as it gets.</p>
+  <p><strong>MPA Confidence: 95.7</strong> &mdash; Adjudicators consistently rate ensembles that perform this piece highly.</p>
+  <p><strong>Street Cred: 15.48</strong> &mdash; Essentially the maximum. It's on Krienes, TMTP, CBA PML, BDG, 18 state lists.</p>
+  <p><strong>Grade 4</strong> &mdash; Accessible to a strong middle school or solid high school band.</p>
+  <p><strong>140 performances across 103 schools</strong> &mdash; Widely performed, not a niche piece.</p>
+  <p><strong>Trend: Stable</strong> &mdash; Consistently reliable for over a decade. Not declining.</p>
+  <p>This is the kind of piece that anchors a program. The question becomes: what goes <em>next to it</em>?</p>
+</div>
+
+<!-- ══════════════════════════════ -->
+<!-- PART III: GROUP ACTIVITY -->
+<!-- ══════════════════════════════ -->
+<div class="section-divider">
+  <div class="line"></div>
+  <div class="section-label">Part III &mdash; Build a Mock Program</div>
+  <div class="line"></div>
+</div>
+
+<div class="kagan-card">
+  <div class="kagan-name">Group Activity &bull; Simultaneous RoundTable</div>
+  <div class="kagan-catchphrase">Three pieces. One program. Defend every choice.</div>
+  <div class="kagan-body">Groups of 3&ndash;4 receive a scenario card. Each person simultaneously browses the database for one candidate piece, then the group compares selections, checks for contrast, and finalizes a 2&ndash;3 piece program. Papers rotate for peer review from another group.</div>
+  <div class="ensemble-use">Connection to the rehearsal hall: this is exactly what you'll do when you sit down to program your first concert as a director. The difference is you'll be doing it alone&mdash;so practice the process now while you have peers to challenge your thinking.</div>
+</div>
+
+<div class="concept-block">
+  <div class="catchphrase">Your scenario.</div>
+  <div class="concept-body">
+    <p>Your group will receive one of the following. Use the database to build a complete adjudicated program.</p>
+    <p><strong>A:</strong> Grade 3 middle school concert band entering a CBA regional festival. Build a 3-piece program.<br>
+    <strong>B:</strong> Grade 5 high school wind ensemble preparing for the CBA State Concert Band Festival. Build a 3-piece program.<br>
+    <strong>C:</strong> Grade 3 high school string orchestra preparing for a Colorado ASTA Large Group Festival. Build a program (20 min max).<br>
+    <strong>D:</strong> Grade 2 middle school full orchestra preparing for a Colorado ASTA regional festival. Build a program.</p>
+  </div>
+</div>
+
+<div class="concept-block">
+  <div class="concept-body">
+    <p><strong>What to do:</strong></p>
+    <p>1. Filter the database to your grade level.</p>
+    <p>2. Sort by Best Bet (highest first).</p>
+    <p>3. Select 2&ndash;3 pieces that create a contrasting program.</p>
+    <p>4. For each piece, note: title, composer, grade, Best Bet, Street Cred, and one sentence about why it belongs on this program.</p>
+    <p>5. Check: does at least one piece feature an underrepresented composer? (Look at the ICD columns.)</p>
+    <p>6. Check: do the pieces actually contrast? Different tempi, styles, periods, keys?</p>
+  </div>
+</div>
+
+<div class="warning-box">
+  <div class="warn-label">Common Trap</div>
+  Don't just sort by Best Bet and grab the top three. That gives you three "safe" picks but possibly zero contrast. The database is a starting point, not a shopping list. You still have to curate.
+</div>
+
+<!-- ══════════════════════════════ -->
+<!-- PART IV: THE DELIVERABLE -->
+<!-- ══════════════════════════════ -->
+<div class="section-divider">
+  <div class="line"></div>
+  <div class="section-label">Part IV &mdash; Your Wednesday Submission</div>
+  <div class="line"></div>
+</div>
+
+<div class="concept-block">
+  <div class="catchphrase">What you're turning in.</div>
+  <div class="concept-body">
+    <p>By Wednesday, submit an adjudicated concert program for a hypothetical ensemble. This is the practical application of everything above. Here's what it should include:</p>
+  </div>
+  <ul class="checklist">
+    <li><strong>Ensemble description</strong> &mdash; What are you programming for? Ensemble type, grade level, approximate size, school context (middle school, high school, etc.).</li>
+    <li><strong>Festival / event target</strong> &mdash; Which assessment? CBA Concert Band Festival? Colorado ASTA Large Group Festival? Be specific.</li>
+    <li><strong>Program listing</strong> &mdash; For each piece: title, composer, arranger (if applicable), grade level, approximate duration, Best Bet score, Street Cred score, and one sentence explaining why this piece belongs on this program.</li>
+    <li><strong>Program rationale</strong> &mdash; 2&ndash;3 sentences explaining how the pieces contrast with each other and what the program teaches as a whole.</li>
+    <li><strong>Diversity note</strong> &mdash; Include at least one piece by an underrepresented composer. Cite the ICD data from the database.</li>
+  </ul>
+</div>
+
+<div class="concept-block">
+  <div class="concept-body">
+    <p><strong>A few things that will strengthen your submission:</strong></p>
+    <p>Match your grade level to your ensemble. A Grade 6 piece on a Grade 3 program tells the adjudicator (and me) that you don't know your ensemble yet. That's a programming problem, not a musicianship flex.</p>
+    <p>If you're programming for a CBA event, check the <code>On CBA PML</code> column. If you're programming for orchestra, check the <code>Ensemble</code> column&mdash;String vs. Full matters.</p>
+    <p>Use the <code>Categories</code> and <code>Style Tags</code> columns to verify contrast. If all three of your band pieces are tagged "lyrical" and "intonation_sensitive," you've programmed three slow pieces. That's not contrast.</p>
+    <p>The <code>Trend Direction</code> column is worth a glance. A piece with a "Declining" trend isn't automatically bad, but it's worth asking why. Sometimes pieces fall out of favor for good reasons.</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════ -->
+<!-- PART V: THE TAKEAWAY -->
+<!-- ══════════════════════════════ -->
+<div class="section-divider">
+  <div class="line"></div>
+  <div class="section-label">Part V &mdash; The Takeaway</div>
+  <div class="line"></div>
+</div>
+
+<div class="concept-block">
+  <div class="catchphrase">Data informs. You decide.</div>
+  <div class="concept-body">
+    <p>These databases are tools, not oracles. A piece with a Best Bet of 97 isn't inherently better than one at 65&mdash;it's more widely vetted and more consistently successful at festival. That's useful information. It's not the whole picture.</p>
+    <p>The whole picture is you, in a room, with a score, thinking about your students. What do they need to learn? What musical experiences are missing from their education? What will challenge them without breaking them? What will they remember in ten years?</p>
+    <p>The database gives you a smarter starting point. The programming&mdash;the real work&mdash;is still yours.</p>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <div class="sources">
+    <strong>Sources &amp; References</strong>
+    Florida Bandmasters Association MPA Data (2009&ndash;2020)<br>
+    Kreines, J. <em>Music for Concert Band</em> and <em>A Selective Annotated Guide</em> (2014&ndash;24)<br>
+    Teaching Music Through Performance in Band (Vols. 1&ndash;11+) and Orchestra (Vols. 1&ndash;4)<br>
+    Institute for Composer Diversity &mdash; composerdiversity.com<br>
+    Band Directors Guide (BDG)<br>
+    Colorado Bandmasters Association &mdash; coloradobandmasters.org<br>
+    Colorado ASTA &mdash; colo-asta.org<br>
+    Colorado Music Educators Association &mdash; cmeaonline.org<br>
+    WindRep.org State Lists and Categories<br>
+    NAfME: "Preparation for Adjudication: A Checklist for Success"
+  </div>
+  Colorado Mesa University &bull; Instrumental Methods
+</div>
+
+</body>
+</html>

@@ -1,0 +1,37 @@
+# Scraped data (regenerable)
+uil_results.csv
+fsma_results.csv
+fsma_xlsx/
+
+# Downloaded FSMA exports
+FSMA_*.xlsx
+
+# Scraper source XLSX (keep the curated databases)
+# WindBand_Repertoire_Database.xlsx — TRACKED
+# Orchestra_Repertoire_Database.xlsx — TRACKED
+
+# Browser downloads / recordings
+flmusiced.org-recording.json
+*FSMAReportData*
+
+# Memory (local only)
+memory/
+
+# Scraper state
+checkpoint.txt
+fsma_checkpoint.txt
+scraper.log
+fsma_scraper.log
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Streamlit
+.streamlit/secrets.toml
