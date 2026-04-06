@@ -261,9 +261,11 @@ def apply_filters(df, is_band, key_prefix=""):
             df = df[df["ICD Diversity"].notna() & (df["ICD Diversity"].astype(str).str.strip() != "")]
 
     if is_band and "Categories" in df.columns:
-        all_selected_tags = []
+        # Each group is its own filter. Within a group: OR. Across groups: AND.
+        # e.g., (Marches OR Jazz) AND (Suites OR Symphonies) — must match
+        # at least one tag from every group that has selections.
+        group_selections = {}
         for group_name, group_tags in CATEGORY_GROUPS.items():
-            # Only show tags that actually exist in current data
             present = [t for t in group_tags if df["Categories"].fillna("").str.contains(t, regex=False).any()]
             if present:
                 sel = st.sidebar.multiselect(
@@ -272,10 +274,12 @@ def apply_filters(df, is_band, key_prefix=""):
                     default=[],
                     key=f"{kp}cat_{group_name}",
                 )
-                all_selected_tags.extend(sel)
-        if all_selected_tags:
+                if sel:
+                    group_selections[group_name] = sel
+        # Apply: piece must match at least one tag from EACH active group
+        for group_name, tags in group_selections.items():
             df = df[df["Categories"].apply(
-                lambda v: any(t in str(v) for t in all_selected_tags) if pd.notna(v) else False
+                lambda v: any(t in str(v) for t in tags) if pd.notna(v) else False
             )]
 
     if not is_band and "Ensemble" in df.columns:
