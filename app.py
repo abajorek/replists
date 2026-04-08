@@ -133,10 +133,12 @@ SORT_OPTIONS = {
     },
 }
 
-# Orchestra has fewer columns — filter sort options
+# Orchestra now has MPA data from UIL
 ORCH_SORT_OPTIONS = {
     "Recommended overall": SORT_OPTIONS["Recommended overall"],
+    "Strongest at festival": SORT_OPTIONS["Strongest at festival"],
     "Most endorsed by professionals": SORT_OPTIONS["Most endorsed by professionals"],
+    "Most performed": SORT_OPTIONS["Most performed"],
     "Alphabetical": SORT_OPTIONS["Alphabetical"],
 }
 
@@ -170,8 +172,8 @@ CATEGORY_GROUPS = {
 # Display columns (plain-language headers mapped later)
 BAND_DISPLAY = ["Title", "Composer", "Grade", "Best Bet", "MPA Confidence",
                 "Street Cred", "ICD Diversity", "Trend Direction", "Categories", "On CBA PML"]
-ORCH_DISPLAY = ["Title", "Composer", "Grade", "Best Bet", "Street Cred",
-                "ICD Diversity", "Ensemble", "On TMTP"]
+ORCH_DISPLAY = ["Title", "Composer", "Grade", "Best Bet", "MPA Confidence",
+                "Street Cred", "ICD Diversity", "Trend Direction", "Ensemble", "On TMTP"]
 
 # ---------------------------------------------------------------------------
 # Data loading
@@ -1073,11 +1075,11 @@ endorsement. A piece scoring 90+ has both strong adjudication results *and*
 broad recognition from teaching guides, prescribed lists, and expert directors.
 
 **Festival performance strength** (MPA Confidence, 0–100)
-Based on Music Performance Assessment (MPA) data from Florida — adjudicated
-festivals where ensembles perform prepared music and sight-reading for a panel
-of judges who assign ratings from Superior (I) to Poor (V). This score
-reflects how consistently ensembles performing this piece earn top ratings,
-adjusted for grade level. *Only available for the band database.*
+Based on adjudicated festival data — for band, from Florida MPA results (2009–2020);
+for orchestra, from Texas UIL Concert & Sightreading evaluations (2009–2026).
+Ensembles perform prepared music and sight-reading for a panel of judges who assign
+ratings from Superior (I) to Poor (V). This score reflects how consistently ensembles
+performing this piece earn top ratings, adjusted for grade level.
 
 **Professional endorsement** (Street Cred, 0–15.5)
 An additive score from professional sources: Teaching Music Through Performance
@@ -1136,8 +1138,8 @@ selected independently of the other concert pieces.
                 m1.metric("Total pieces", f"{len(orch_df):,}")
                 urm_o = orch_df[orch_df["ICD Diversity"].notna() & (orch_df["ICD Diversity"].astype(str).str.strip() != "")]
                 m2.metric("Underrepresented", f"{len(urm_o):,}")
-                pct_o = len(urm_o) / len(orch_df) * 100
-                m3.metric("ICD %", f"{pct_o:.1f}%")
+                with_perf = orch_df["Total Perfs"].notna().sum() if "Total Perfs" in orch_df.columns else 0
+                m3.metric("With UIL data", f"{with_perf:,}")
 
                 st.markdown("**Pieces by grade**")
                 gc_o = orch_df["Grade"].value_counts().sort_index()
