@@ -216,7 +216,8 @@ CATEGORY_GROUPS = {
 BAND_DISPLAY = ["Title", "Composer", "Arranger", "Grade", "Best Bet", "MPA Confidence",
                 "Street Cred", "ICD Diversity", "Trend Direction", "Categories", "On CBA PML"]
 ORCH_DISPLAY = ["Title", "Composer", "Arranger", "Grade", "Best Bet", "MPA Confidence",
-                "Street Cred", "ICD Diversity", "Trend Direction", "Ensemble", "On TMTP"]
+                "Street Cred", "% Superior", "FL MPA Perfs", "ICD Diversity",
+                "Trend Direction", "Ensemble", "On TMTP"]
 
 # ---------------------------------------------------------------------------
 # Data loading
