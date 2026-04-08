@@ -500,6 +500,13 @@ def render_piece_card(row, pairings_data, source_df, is_band, show_add=False, pr
         tp = row.get("Total Perfs", "")
         if pd.notna(tp) and str(tp).strip():
             st.markdown(f"**Times performed at festival:** {int(tp):,}")
+        fl_perfs = row.get("FL MPA Perfs", "")
+        if pd.notna(fl_perfs) and str(fl_perfs).strip():
+            fl_sup = row.get("FL MPA % Superior", "")
+            fl_label = f"**Florida MPA:** {int(float(fl_perfs)):,} performances"
+            if pd.notna(fl_sup) and str(fl_sup).strip():
+                fl_label += f", {float(fl_sup):.1f}% Superior"
+            st.markdown(fl_label)
         trend = row.get("Trend Direction", "")
         if pd.notna(trend) and str(trend).strip():
             st.markdown(f"**Trend:** {trend}")
