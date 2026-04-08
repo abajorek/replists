@@ -624,37 +624,147 @@ def render_program_sidebar():
             st.rerun()
 
     st.sidebar.markdown("---")
-    st.sidebar.markdown("### Program Check")
+    st.sidebar.markdown("### Program Evaluation")
+    st.sidebar.caption("Based on TMAA adjudication criteria and FBA mentoring guidance.")
 
+    score = 0
+    max_score = 0
+    checks = []
+
+    # --- 1. Grade spread (difficulty appropriateness) ---
     grades = [p["Grade"] for p in prog if pd.notna(p.get("Grade"))]
+    max_score += 20
     if grades:
+        grade_range = max(grades) - min(grades)
         st.sidebar.markdown(f"**Grade range:** {min(grades)} – {max(grades)}")
         if len(grades) > 1 and len(set(grades)) == 1:
-            st.sidebar.warning("All pieces are the same grade — consider varying difficulty.")
+            checks.append(("warning", "Same grade throughout — consider varying difficulty."))
+            score += 10
+        elif grade_range <= 2:
+            checks.append(("success", f"Good grade spread ({grade_range} levels) ✓"))
+            score += 20
+        elif grade_range > 3:
+            checks.append(("warning", f"Wide grade spread ({grade_range} levels) — may signal mismatch."))
+            score += 5
+        else:
+            score += 15
 
-    has_div = any(
-        pd.notna(p.get("ICD Diversity")) and str(p.get("ICD Diversity", "")).strip()
-        for p in prog
-    )
-    if has_div:
-        st.sidebar.success("Includes underrepresented composer (ICD) ✓")
-    else:
-        st.sidebar.warning("No underrepresented composer — consider adding one (ICD).")
-
+    # --- 2. Stylistic contrast ---
+    max_score += 20
     all_tags = set()
+    all_cats = set()
     for p in prog:
         for col in ["Style Tags", "Categories"]:
             val = p.get(col)
             if pd.notna(val) and val:
                 for t in str(val).split(";"):
                     t = t.strip()
-                    if t: all_tags.add(t)
-    if len(all_tags) >= 3:
-        st.sidebar.success(f"Good stylistic contrast ({len(all_tags)} different styles) ✓")
-    elif len(all_tags) >= 1:
-        st.sidebar.info(f"Some contrast ({len(all_tags)} style{'s' if len(all_tags)!=1 else ''}) — could be stronger.")
+                    if t:
+                        all_tags.add(t)
+                for t in str(val).split(","):
+                    t = t.strip()
+                    if t:
+                        all_cats.add(t)
+    if len(all_tags) >= 4 or len(all_cats) >= 3:
+        checks.append(("success", f"Strong stylistic contrast ({len(all_cats)} categories) ✓"))
+        score += 20
+    elif len(all_tags) >= 2 or len(all_cats) >= 2:
+        checks.append(("info", f"Some contrast ({len(all_cats)} categories) — could be stronger."))
+        score += 12
     elif prog:
-        st.sidebar.warning("No style data available for contrast check.")
+        checks.append(("warning", "Limited style data — ensure tempo/character variety."))
+        score += 5
+
+    # --- 3. Composer diversity (ICD) ---
+    max_score += 15
+    has_div = any(
+        pd.notna(p.get("ICD Diversity")) and str(p.get("ICD Diversity", "")).strip()
+        for p in prog
+    )
+    if has_div:
+        checks.append(("success", "Includes underrepresented composer (ICD) ✓"))
+        score += 15
+    else:
+        checks.append(("info", "No ICD composer — consider adding one."))
+        score += 5
+
+    # --- 4. Track record (pieces with strong MPA history) ---
+    max_score += 20
+    sup_rates = []
+    for p in prog:
+        sr = p.get("% Superior")
+        if pd.notna(sr) and str(sr).strip():
+            sup_rates.append(float(sr))
+        else:
+            fl_sr = p.get("FL MPA % Superior")
+            if pd.notna(fl_sr) and str(fl_sr).strip():
+                sup_rates.append(float(fl_sr))
+    if sup_rates:
+        avg_sup = sum(sup_rates) / len(sup_rates)
+        if avg_sup >= 50:
+            checks.append(("success", f"Strong MPA track record (avg {avg_sup:.0f}% superior) ✓"))
+            score += 20
+        elif avg_sup >= 30:
+            checks.append(("info", f"Moderate MPA record (avg {avg_sup:.0f}% superior)."))
+            score += 12
+        else:
+            checks.append(("warning", f"Low MPA record (avg {avg_sup:.0f}% superior) — challenging choices."))
+            score += 5
+    else:
+        checks.append(("info", "No MPA history available for these pieces."))
+        score += 10
+
+    # --- 5. Edition clarity (arranger specified for transcriptions) ---
+    max_score += 15
+    cats_str = " ".join(str(p.get("Categories", "")) for p in prog).lower()
+    is_transcription = "transcription" in cats_str or "arrangement" in cats_str
+    missing_arranger = any(
+        (not p.get("Arranger") or pd.isna(p.get("Arranger")) or str(p.get("Arranger", "")).strip() in ("", "nan"))
+        and ("/" in str(p.get("Composer", "")) or is_transcription)
+        for p in prog
+    )
+    if is_transcription and missing_arranger:
+        checks.append(("error", "Transcription/arrangement missing arranger — verify edition! Wrong edition = DQ."))
+        score += 0
+    elif is_transcription:
+        checks.append(("success", "Transcription with arranger specified ✓"))
+        score += 15
+    else:
+        score += 15  # Not a transcription, not an issue
+
+    # --- 6. Composer variety ---
+    max_score += 10
+    composers = set()
+    for p in prog:
+        c = str(p.get("Composer", "")).strip().lower().split(",")[0]
+        if c and c != "nan":
+            composers.add(c)
+    if len(composers) >= len(prog) and len(prog) > 1:
+        checks.append(("success", "All different composers ✓"))
+        score += 10
+    elif len(prog) > 1:
+        checks.append(("warning", "Repeated composer — UIL requires different composers for orchestra."))
+        score += 0
+
+    # --- Display results ---
+    if max_score > 0:
+        pct = score / max_score * 100
+        if pct >= 80:
+            st.sidebar.success(f"**Program Score: {pct:.0f}/100**")
+        elif pct >= 60:
+            st.sidebar.info(f"**Program Score: {pct:.0f}/100**")
+        else:
+            st.sidebar.warning(f"**Program Score: {pct:.0f}/100**")
+
+    for level, msg in checks:
+        if level == "success":
+            st.sidebar.success(msg)
+        elif level == "warning":
+            st.sidebar.warning(msg)
+        elif level == "error":
+            st.sidebar.error(msg)
+        else:
+            st.sidebar.info(msg)
 
 
 def export_csv(prog):
@@ -1597,6 +1707,35 @@ program should include pieces totaling 10–15 minutes. Don't overschedule.
 **8. Include underrepresented voices.**
 Programs that include diverse composers demonstrate musical breadth and
 reflect the full landscape of the profession. Use the ICD filter to explore.
+        """)
+
+        st.markdown("---")
+        st.markdown("### What judges evaluate")
+        st.markdown("""
+Per the **Texas Music Adjudicators Association** (TMAA) orchestra workshop
+and UIL concert adjudication rubric, judges score three areas:
+
+**Tone** — Mature, characteristic sound. Balance and blend across sections.
+Intonation. Dynamic contrast without distortion.
+
+**Technique** — Accuracy of notes and rhythms. Appropriate tempo for the
+literature. Clean articulation. Observance of ties, slurs, and markings.
+
+**Musicianship** — Appropriate style. Sensitivity to phrasing. Nuance and
+contrast. Correct tempo. Conveying musical understanding and emotion.
+
+*Ratings:*
+- **I (Superior)** — Worthy of the highest recognition. "Should be fun to hear."
+- **II (Excellent)** — Distinctive quality, but minor defects or ineffective interpretation.
+- **III (Average)** — Accomplishment and promise, lacking in one or more essentials.
+- **IV (Below Average)** — Basic weakness in a fundamental factor.
+- **V (Poor)** — Much room for improvement.
+
+Key principle: **Judges evaluate the performance as heard, not the reputation
+of the program.** They consider both frequency of errors and recovery from
+errors. No performance is expected to be perfect.
+
+*Source: TMAA Orchestra Workshop (Jeff Turner, TMAA Orchestra VP), UIL C&SR rubric.*
         """)
 
         st.markdown("---")
