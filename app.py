@@ -1506,11 +1506,16 @@ endorsement. A piece scoring 90+ has both strong adjudication results *and*
 broad recognition from teaching guides, prescribed lists, and expert directors.
 
 **Festival performance strength** (MPA Confidence, 0–100)
-Based on adjudicated festival data — for band, from Florida MPA results (2009–2020);
-for orchestra, from Texas UIL Concert & Sightreading evaluations (2009–2026).
-Ensembles perform prepared music and sight-reading for a panel of judges who assign
-ratings from Superior (I) to Poor (V). This score reflects how consistently ensembles
-performing this piece earn top ratings, adjusted for grade level.
+Based on adjudicated festival data — for band, from Florida MPA results (2009–2026)
+and Texas UIL Concert & Sightreading evaluations; for orchestra, from UIL data.
+Ensembles perform a complete concert program (typically 3 pieces) and sight-reading
+for a panel of judges who assign ratings from Superior (I) to Poor (V).
+
+**Important:** Ratings are given to the *ensemble's full program*, not to individual
+pieces. This score reflects how consistently ensembles *whose programs include this
+piece* earn top ratings, adjusted for grade level. It's an associative signal — strong
+directors tend to choose certain pieces, and programs containing those pieces tend to
+score well — but it does not mean the piece itself caused the rating.
 
 **Professional endorsement** (Street Cred, 0–15.5)
 An additive score from professional sources: Teaching Music Through Performance
@@ -1577,8 +1582,9 @@ selected independently of the other concert pieces.
                 st.bar_chart(gc_o, height=200)
 
         st.markdown("---")
-        st.caption("Data sources: Florida Bandmasters Association MPA (2009–2020), "
+        st.caption("Data sources: Florida Bandmasters Association Concert MPA (2009–2026), "
                    "Texas UIL Concert & Sightreading (2009–2026), "
+                   "Wind Repertory Project (windrep.org), "
                    "Teaching Music Through Performance in Band & Orchestra, "
                    "Kreines Concert Repertoire Guide, Band Directors Guide, "
                    "Institute for Composer Diversity, 22 state prescribed music lists, "
