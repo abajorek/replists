@@ -170,9 +170,9 @@ CATEGORY_GROUPS = {
 }
 
 # Display columns (plain-language headers mapped later)
-BAND_DISPLAY = ["Title", "Composer", "Grade", "Best Bet", "MPA Confidence",
+BAND_DISPLAY = ["Title", "Composer", "Arranger", "Grade", "Best Bet", "MPA Confidence",
                 "Street Cred", "ICD Diversity", "Trend Direction", "Categories", "On CBA PML"]
-ORCH_DISPLAY = ["Title", "Composer", "Grade", "Best Bet", "MPA Confidence",
+ORCH_DISPLAY = ["Title", "Composer", "Arranger", "Grade", "Best Bet", "MPA Confidence",
                 "Street Cred", "ICD Diversity", "Trend Direction", "Ensemble", "On TMTP"]
 
 # ---------------------------------------------------------------------------
@@ -424,10 +424,15 @@ def render_piece_card(row, pairings_data, source_df, is_band, show_add=False, pr
     composer = row.get("Composer", "")
     grade = row.get("Grade", "?")
 
+    arranger = row.get("Arranger", "")
+    arr_str = ""
+    if pd.notna(arranger) and str(arranger).strip():
+        arr_str = f" (arr. {arranger})"
+
     st.markdown(
         f'<div class="detail-card">'
         f'<h4>{title}</h4>'
-        f'<div class="meta">{composer} · Grade {grade}</div>'
+        f'<div class="meta">{composer}{arr_str} · Grade {grade}</div>'
         f'</div>',
         unsafe_allow_html=True,
     )
