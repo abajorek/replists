@@ -393,6 +393,12 @@ def apply_filters(df, is_band, key_prefix=""):
             if sel_ens:
                 df = df[df["Ensemble"].isin(sel_ens)]
 
+    if not is_band and "Midwest Director Pick" in df.columns:
+        if st.sidebar.checkbox("Midwest Clinic director picks only", key=f"{kp}midwest",
+                               help="Pieces programmed 2+ times by directors whose orchestras "
+                                    "have performed at the Midwest Clinic."):
+            df = df[df["Midwest Director Pick"].notna() & (df["Midwest Director Pick"].astype(str).str.strip() != "")]
+
     if is_band and "On CBA PML" in df.columns:
         if st.sidebar.checkbox("On CBA Prescribed Music List only", key=f"{kp}cba"):
             df = df[df["On CBA PML"].notna() & (df["On CBA PML"].astype(str).str.strip() != "")]
@@ -477,6 +483,9 @@ def render_piece_card(row, pairings_data, source_df, is_band, show_add=False, pr
             st.markdown("**Prestige director pick:** Tier 1")
         elif pd.notna(dir2) and str(dir2).strip():
             st.markdown("**Prestige director pick:** Tier 2")
+        mw = row.get("Midwest Director Pick", "")
+        if pd.notna(mw) and str(mw).strip():
+            st.markdown("**Midwest Clinic director pick:** Yes")
         cba = row.get("On CBA PML", "")
         if pd.notna(cba) and str(cba).strip():
             st.markdown("**On CBA Prescribed Music List:** Yes")
