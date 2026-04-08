@@ -233,6 +233,23 @@ def get_pairings(title, composer, pairings_data, limit=5):
     entry = pairings_data.get("pairings", {}).get(piece_id, {})
     return entry.get("suggestions", [])[:limit]
 
+
+def find_piece_in_db(title, composer, source_df):
+    """Find a piece in the database by matching on normalized title/composer."""
+    nt = _norm_title(title)
+    nc = _norm_composer(composer)
+    norm_titles = source_df["Title"].fillna("").apply(_norm_title)
+    norm_composers = source_df["Composer"].fillna("").apply(_norm_composer)
+    # Exact match on both
+    mask = (norm_titles == nt) & (norm_composers == nc)
+    if mask.any():
+        return source_df.loc[mask.idxmax()]
+    # Title-only fallback
+    mask_t = norm_titles == nt
+    if mask_t.any():
+        return source_df.loc[mask_t.idxmax()]
+    return None
+
 def is_march(row):
     """Check if a piece is likely a march based on style tags or categories."""
     for col in ["Style Tags", "Categories", "Style Category"]:
@@ -243,6 +260,91 @@ def is_march(row):
     if "march" in title:
         return True
     return False
+
+
+def get_marches(source_df):
+    """Extract all marches from the band database."""
+    mask = (
+        source_df["Categories"].fillna("").str.contains("March", case=False, regex=False)
+        | source_df["Title"].fillna("").str.lower().str.contains("march", regex=False)
+    )
+    return source_df[mask].copy()
+
+
+MARCH_SORT_OPTIONS = {
+    "Recommended overall": {
+        "col": "Best Bet",
+        "help": "Combined score weighing adjudication results and professional endorsement.",
+    },
+    "Highest superior rate": {
+        "col": "% Superior",
+        "help": "What percentage of festival performances earned the top rating (Superior / 1). "
+                "Higher means ensembles playing this march reliably earn a 1.",
+    },
+    "Strongest at festival": {
+        "col": "MPA Confidence",
+        "help": "How consistently this march earns top ratings at adjudicated festivals.",
+    },
+    "Most performed": {
+        "col": "Total Perfs",
+        "help": "How many times this march has been programmed at festivals.",
+    },
+    "Most endorsed by professionals": {
+        "col": "Street Cred",
+        "help": "How widely this march is vetted by professional sources and teaching guides.",
+    },
+    "Alphabetical": {
+        "col": "Title",
+        "help": "Sort by title A–Z.",
+    },
+}
+
+
+def apply_march_filters(df, key_prefix="march_"):
+    """Sidebar filters specific to the march selector."""
+    kp = key_prefix
+
+    grades = sorted(df["Grade"].dropna().unique())
+    sel_grades = st.sidebar.multiselect("March grade level", grades, default=[], key=f"{kp}grade")
+    if sel_grades:
+        df = df[df["Grade"].isin(sel_grades)]
+
+    if st.sidebar.checkbox("Prestige director picks only", key=f"{kp}prestige",
+                           help="Marches favored by directors with 80%+ superior rates across 5+ years."):
+        df = df[df["Dir Tier 1"].notna() | df["Dir Tier 2"].notna()]
+
+    if st.sidebar.checkbox("On TMTP March list", key=f"{kp}tmtp",
+                           help="Featured in Teaching Music Through Performance in Band: March Collection."):
+        df = df[df["TMTP March"].astype(str) == "True"]
+
+    if st.sidebar.checkbox("Underrepresented composers only (ICD)", key=f"{kp}urm"):
+        df = df[df["ICD Diversity"].notna() & (df["ICD Diversity"].astype(str).str.strip() != "")]
+
+    if "On CBA PML" in df.columns:
+        if st.sidebar.checkbox("On CBA Prescribed Music List", key=f"{kp}cba"):
+            df = df[df["On CBA PML"].notna() & (df["On CBA PML"].astype(str).str.strip() != "")]
+
+    # Patriotic filter
+    if st.sidebar.checkbox("Patriotic marches only", key=f"{kp}patriotic"):
+        df = df[df["Categories"].fillna("").str.contains("Patriotic", case=False, regex=False)]
+
+    # Trend filter
+    trends = sorted(df["Trend Direction"].dropna().unique())
+    if trends:
+        sel_trend = st.sidebar.multiselect("Popularity trend", trends, default=[], key=f"{kp}trend",
+                                           help="Rising = gaining popularity. Declining = fading from programs.")
+        if sel_trend:
+            df = df[df["Trend Direction"].isin(sel_trend)]
+
+    search = st.sidebar.text_input("Search march title / composer", key=f"{kp}search")
+    if search:
+        s = search.lower()
+        df = df[
+            df["Title"].fillna("").str.lower().str.contains(s, regex=False)
+            | df["Composer"].fillna("").str.lower().str.contains(s, regex=False)
+        ]
+
+    return df
 
 # ---------------------------------------------------------------------------
 # Sidebar filters
@@ -596,7 +698,6 @@ def main():
     # ==================================================================
     with tab2:
         prog = st.session_state["program"]
-        n_prog = len(prog)
 
         # Ensemble selection
         db_pb = st.radio("What ensemble are you programming for?",
@@ -613,117 +714,330 @@ def main():
             sort_opts_pb = ORCH_SORT_OPTIONS
 
         # Sidebar: filters + program
-        st.sidebar.markdown("---")
-        st.sidebar.markdown(f"### Narrow Your Search")
-        filtered_pb = apply_filters(source_pb, is_band_pb, key_prefix="pb_")
         render_program_sidebar()
 
-        # Step indicators
-        steps_html = ""
-        for i in range(1, 4):
-            label = f"Piece {i}"
-            if i <= n_prog:
-                p = prog[i-1]
-                label = p.get("Title", "Piece")[:25]
-                cls = "step-indicator"
-            elif i == n_prog + 1:
-                cls = "step-indicator"
-            else:
-                cls = "step-indicator step-inactive"
-            steps_html += f'<span class="{cls}">{i}</span> {label} &nbsp;&nbsp;&nbsp;'
+        if is_band_pb:
+            # ==========================================================
+            # BAND: March + Anchor Piece + Auto-Paired Companion
+            # ==========================================================
 
-        st.markdown(steps_html, unsafe_allow_html=True)
-        st.markdown("")
+            # --- March selection ---
+            st.markdown("### 1. Choose your march")
+            st.markdown("A band concert program starts with a march. "
+                        "Use the sidebar filters to narrow by grade, style, or preference.")
 
-        # --- Program complete ---
-        if n_prog >= 3:
-            st.success("Your program is complete — 3 pieces selected.")
-            st.markdown("Review your selections in the sidebar, or export below.")
+            st.sidebar.markdown("---")
+            st.sidebar.markdown("### March Filters")
+            all_marches = get_marches(source_pb)
+            filtered_marches = apply_march_filters(all_marches, key_prefix="march_")
 
-            st.markdown("---")
-            for i, p in enumerate(prog):
-                st.markdown(f"### Piece {i+1}")
-                render_piece_card(p, pairings_data, source_pb, is_band_pb,
-                                  prog_titles={(
-                                      _norm_title(pp.get("Title", "")),
-                                      _norm_composer(pp.get("Composer", ""))
-                                  ) for pp in prog})
-
-            st.markdown("---")
-            st.markdown("### Export")
-            ec1, ec2 = st.columns(2)
-            ec1.download_button("Download as CSV", data=export_csv(prog),
-                                file_name="concert_program.csv", mime="text/csv")
-            ec2.download_button("Download program sheet", data=export_text(prog),
-                                file_name="concert_program.txt", mime="text/plain")
-            return
-
-        # --- Selecting next piece ---
-        piece_num = n_prog + 1
-        if n_prog == 0:
-            st.markdown("### Choose your first piece")
-            st.markdown("Use the filters in the sidebar to narrow by grade level, style, "
-                        "or composer identity. Then sort to find what matters most to you.")
-        elif n_prog == 1:
-            st.markdown("### Choose your second piece")
-            st.markdown(f"Your first piece is **{prog[0].get('Title', '')}**. "
-                        "Look for something that contrasts — a different tempo, style, or character.")
-        else:
-            st.markdown("### Choose your third piece")
-            st.markdown("Complete your program. Think about what's missing — "
-                        "if you have two slower pieces, consider something energetic, or vice versa.")
-
-        # Sort
-        sort_pb = st.selectbox(
-            "Sort pieces by",
-            list(sort_opts_pb.keys()),
-            index=0,
-            key="pb_sort",
-            help="Choose what matters most to you for this selection.",
-        )
-        sort_info_pb = sort_opts_pb[sort_pb]
-        st.caption(sort_info_pb["help"])
-
-        sort_col_pb = sort_info_pb["col"]
-        if sort_col_pb in filtered_pb.columns:
-            if sort_col_pb == "Title":
-                filtered_pb = filtered_pb.sort_values(sort_col_pb, ascending=True, na_position="last")
-            else:
-                filtered_pb = filtered_pb.sort_values(sort_col_pb, ascending=False, na_position="last")
-
-        st.markdown(f"**{len(filtered_pb):,}** pieces available")
-
-        # Piece selection
-        if not filtered_pb.empty:
-            options_pb = filtered_pb.apply(
-                lambda r: f"{r['Title']}  —  {r['Composer']}  (Gr {r.get('Grade', '?')})"
-                if pd.notna(r.get("Composer")) else str(r["Title"]),
-                axis=1,
-            ).tolist()
-
-            selected = st.selectbox(
-                f"Select piece {piece_num}",
-                options_pb,
-                index=None,
-                key=f"wizard_sel_{piece_num}",
-                placeholder="Type to search or scroll...",
+            march_sort = st.selectbox(
+                "Sort marches by",
+                list(MARCH_SORT_OPTIONS.keys()),
+                index=0,
+                key="pb_march_sort",
             )
+            march_sort_info = MARCH_SORT_OPTIONS[march_sort]
+            st.caption(march_sort_info["help"])
 
-            if selected is not None:
-                row = filtered_pb.iloc[options_pb.index(selected)]
-                prog_titles = {(
-                    _norm_title(pp.get("Title", "")),
-                    _norm_composer(pp.get("Composer", ""))
-                ) for pp in prog}
+            march_sort_col = march_sort_info["col"]
+            if march_sort_col in filtered_marches.columns:
+                if march_sort_col == "Title":
+                    filtered_marches = filtered_marches.sort_values(march_sort_col, ascending=True, na_position="last")
+                else:
+                    filtered_marches = filtered_marches.sort_values(march_sort_col, ascending=False, na_position="last")
 
-                did_add = render_piece_card(
-                    row, pairings_data, source_pb, is_band_pb,
-                    show_add=True,
-                    prog_titles=prog_titles,
+            st.markdown(f"**{len(filtered_marches):,}** marches available")
+
+            march_selected = None
+            if not filtered_marches.empty:
+                march_options = filtered_marches.apply(
+                    lambda r: f"{r['Title']}  —  {r['Composer']}  (Gr {r.get('Grade', '?')})"
+                    if pd.notna(r.get("Composer")) else str(r["Title"]),
+                    axis=1,
+                ).tolist()
+
+                march_choice = st.selectbox(
+                    "Select your march",
+                    march_options,
+                    index=None,
+                    key="pb_march_sel",
+                    placeholder="Type to search or scroll...",
                 )
-                if did_add:
-                    add_piece(row.to_dict())
-                    st.rerun()
+
+                if march_choice is not None:
+                    march_row = filtered_marches.iloc[march_options.index(march_choice)]
+                    march_selected = march_row.to_dict()
+
+                    # Show march detail card
+                    render_piece_card(march_row, None, source_pb, is_band_pb)
+            else:
+                st.info("No marches match your filters. Adjust the sidebar filters.")
+
+            st.markdown("---")
+
+            # --- Anchor piece selection (non-march) ---
+            st.markdown("### 2. Choose your anchor piece")
+            st.markdown("Pick the concert piece you want to build around. "
+                        "A common companion will be suggested automatically.")
+
+            st.sidebar.markdown("---")
+            st.sidebar.markdown("### Concert Piece Filters")
+            # Filter marches OUT of the concert piece pool
+            non_march_pb = source_pb[~source_pb.index.isin(all_marches.index)]
+            filtered_pb = apply_filters(non_march_pb, is_band_pb, key_prefix="pb_")
+
+            sort_pb = st.selectbox(
+                "Sort pieces by",
+                list(sort_opts_pb.keys()),
+                index=0,
+                key="pb_sort",
+            )
+            sort_info_pb = sort_opts_pb[sort_pb]
+            st.caption(sort_info_pb["help"])
+
+            sort_col_pb = sort_info_pb["col"]
+            if sort_col_pb in filtered_pb.columns:
+                if sort_col_pb == "Title":
+                    filtered_pb = filtered_pb.sort_values(sort_col_pb, ascending=True, na_position="last")
+                else:
+                    filtered_pb = filtered_pb.sort_values(sort_col_pb, ascending=False, na_position="last")
+
+            st.markdown(f"**{len(filtered_pb):,}** pieces available")
+
+            if filtered_pb.empty:
+                st.info("No pieces match your filters. Adjust the sidebar filters.")
+            else:
+                options_pb = filtered_pb.apply(
+                    lambda r: f"{r['Title']}  —  {r['Composer']}  (Gr {r.get('Grade', '?')})"
+                    if pd.notna(r.get("Composer")) else str(r["Title"]),
+                    axis=1,
+                ).tolist()
+
+                selected = st.selectbox(
+                    "Select your anchor piece",
+                    options_pb,
+                    index=None,
+                    key="pb_anchor_sel",
+                    placeholder="Type to search or scroll...",
+                )
+
+                if selected is not None:
+                    anchor_row = filtered_pb.iloc[options_pb.index(selected)]
+                    anchor_dict = anchor_row.to_dict()
+
+                    render_piece_card(anchor_row, None, source_pb, is_band_pb)
+
+                    # Build suggested companion from pairings
+                    pairs = get_pairings(
+                        anchor_dict.get("Title", ""),
+                        anchor_dict.get("Composer", ""),
+                        pairings_data,
+                        limit=10,
+                    )
+                    pairs = [p for p in pairs if not is_march(p)]
+
+                    st.markdown("---")
+                    st.markdown("### 3. Suggested companion piece")
+
+                    if not pairs:
+                        st.info("No pairing data available for this piece. "
+                                "You can still browse for a companion in the Browse tab.")
+                    else:
+                        st.markdown("Based on **479,000+ ensemble programs** from UIL evaluations, "
+                                    "here is the most common companion. Swap if you'd like.")
+
+                        pair_options_2 = [
+                            f"{p['title']}  —  {p['composer']}  ({p['count']:,}× together)"
+                            for p in pairs
+                        ]
+                        swap_2 = st.selectbox(
+                            "Companion piece",
+                            pair_options_2,
+                            index=0,
+                            key="pb_pair2",
+                            label_visibility="collapsed",
+                        )
+                        sel_pair_2 = pairs[pair_options_2.index(swap_2)]
+                        db_row_2 = find_piece_in_db(sel_pair_2["title"], sel_pair_2["composer"], source_pb)
+                        if db_row_2 is not None:
+                            render_piece_card(db_row_2, pairings_data, source_pb, is_band_pb)
+                        else:
+                            st.markdown(f"**{sel_pair_2['title']}** — {sel_pair_2['composer']}")
+                            st.caption("Not in the current database — no additional details available.")
+
+                    # --- Confirm & Export ---
+                    st.markdown("---")
+
+                    final_prog = []
+                    if march_selected:
+                        final_prog.append(march_selected)
+                    final_prog.append(anchor_dict)
+                    if pairs:
+                        if db_row_2 is not None:
+                            final_prog.append(db_row_2.to_dict() if hasattr(db_row_2, 'to_dict') else db_row_2)
+                        else:
+                            final_prog.append({"Title": sel_pair_2["title"], "Composer": sel_pair_2["composer"]})
+
+                    if march_selected and pairs:
+                        if st.button("Confirm this program", type="primary", key="pb_confirm"):
+                            st.session_state["program"] = final_prog
+                            st.rerun()
+                    elif not march_selected:
+                        st.warning("Select a march above to complete your program.")
+
+                    if len(prog) >= 2:
+                        st.success("Program confirmed! Export below.")
+                        st.markdown("### Export")
+                        ec1, ec2 = st.columns(2)
+                        ec1.download_button("Download as CSV", data=export_csv(prog),
+                                            file_name="concert_program.csv", mime="text/csv")
+                        ec2.download_button("Download program sheet", data=export_text(prog),
+                                            file_name="concert_program.txt", mime="text/plain")
+
+        else:
+            # ==========================================================
+            # ORCHESTRA: Anchor Piece + 2 Auto-Paired Companions
+            # ==========================================================
+            st.sidebar.markdown("---")
+            st.sidebar.markdown("### Filters")
+            filtered_pb = apply_filters(source_pb, is_band_pb, key_prefix="pb_")
+
+            st.markdown("### Pick your anchor piece")
+            st.markdown("Choose the piece you want to build your program around. "
+                        "Common pairings will fill in automatically.")
+
+            sort_pb = st.selectbox(
+                "Sort pieces by",
+                list(sort_opts_pb.keys()),
+                index=0,
+                key="pb_sort",
+            )
+            sort_info_pb = sort_opts_pb[sort_pb]
+            st.caption(sort_info_pb["help"])
+
+            sort_col_pb = sort_info_pb["col"]
+            if sort_col_pb in filtered_pb.columns:
+                if sort_col_pb == "Title":
+                    filtered_pb = filtered_pb.sort_values(sort_col_pb, ascending=True, na_position="last")
+                else:
+                    filtered_pb = filtered_pb.sort_values(sort_col_pb, ascending=False, na_position="last")
+
+            st.markdown(f"**{len(filtered_pb):,}** pieces available")
+
+            if filtered_pb.empty:
+                st.info("No pieces match your filters. Adjust the sidebar filters.")
+            else:
+                options_pb = filtered_pb.apply(
+                    lambda r: f"{r['Title']}  —  {r['Composer']}  (Gr {r.get('Grade', '?')})"
+                    if pd.notna(r.get("Composer")) else str(r["Title"]),
+                    axis=1,
+                ).tolist()
+
+                selected = st.selectbox(
+                    "Select your anchor piece",
+                    options_pb,
+                    index=None,
+                    key="pb_anchor_sel",
+                    placeholder="Type to search or scroll...",
+                )
+
+                if selected is not None:
+                    anchor_row = filtered_pb.iloc[options_pb.index(selected)]
+                    anchor_dict = anchor_row.to_dict()
+
+                    render_piece_card(anchor_row, None, source_pb, is_band_pb)
+
+                    pairs = get_pairings(
+                        anchor_dict.get("Title", ""),
+                        anchor_dict.get("Composer", ""),
+                        pairings_data,
+                        limit=10,
+                    )
+                    pairs = [p for p in pairs if not is_march(p)]
+
+                    st.markdown("---")
+
+                    if not pairs:
+                        st.info("No pairing data available for this piece.")
+                    else:
+                        st.markdown("### Suggested companion pieces")
+                        st.markdown("Based on **479,000+ ensemble programs** from UIL evaluations. "
+                                    "Swap any piece if you'd like.")
+
+                        # --- Piece 2 ---
+                        st.markdown("#### Piece 2")
+                        pair_options_2 = [
+                            f"{p['title']}  —  {p['composer']}  ({p['count']:,}× together)"
+                            for p in pairs
+                        ]
+                        swap_2 = st.selectbox(
+                            "Piece 2",
+                            pair_options_2,
+                            index=0,
+                            key="pb_pair2",
+                            label_visibility="collapsed",
+                        )
+                        sel_pair_2 = pairs[pair_options_2.index(swap_2)]
+                        db_row_2 = find_piece_in_db(sel_pair_2["title"], sel_pair_2["composer"], source_pb)
+                        if db_row_2 is not None:
+                            render_piece_card(db_row_2, pairings_data, source_pb, is_band_pb)
+                        else:
+                            st.markdown(f"**{sel_pair_2['title']}** — {sel_pair_2['composer']}")
+                            st.caption("Not in the current database — no additional details available.")
+
+                        # --- Piece 3 ---
+                        remaining = [p for p in pairs if p is not sel_pair_2]
+                        st.markdown("#### Piece 3")
+                        sel_pair_3 = None
+                        db_row_3 = None
+                        if remaining:
+                            pair_options_3 = [
+                                f"{p['title']}  —  {p['composer']}  ({p['count']:,}× together)"
+                                for p in remaining
+                            ]
+                            swap_3 = st.selectbox(
+                                "Piece 3",
+                                pair_options_3,
+                                index=0,
+                                key="pb_pair3",
+                                label_visibility="collapsed",
+                            )
+                            sel_pair_3 = remaining[pair_options_3.index(swap_3)]
+                            db_row_3 = find_piece_in_db(sel_pair_3["title"], sel_pair_3["composer"], source_pb)
+                            if db_row_3 is not None:
+                                render_piece_card(db_row_3, pairings_data, source_pb, is_band_pb)
+                            else:
+                                st.markdown(f"**{sel_pair_3['title']}** — {sel_pair_3['composer']}")
+                                st.caption("Not in the current database — no additional details available.")
+                        else:
+                            st.info("Only one pairing suggestion available.")
+
+                        # --- Confirm & Export ---
+                        st.markdown("---")
+                        final_prog = [anchor_dict]
+                        if db_row_2 is not None:
+                            final_prog.append(db_row_2.to_dict() if hasattr(db_row_2, 'to_dict') else db_row_2)
+                        else:
+                            final_prog.append({"Title": sel_pair_2["title"], "Composer": sel_pair_2["composer"]})
+                        if sel_pair_3:
+                            if db_row_3 is not None:
+                                final_prog.append(db_row_3.to_dict() if hasattr(db_row_3, 'to_dict') else db_row_3)
+                            else:
+                                final_prog.append({"Title": sel_pair_3["title"], "Composer": sel_pair_3["composer"]})
+
+                        if st.button("Confirm this program", type="primary", key="pb_confirm"):
+                            st.session_state["program"] = final_prog
+                            st.rerun()
+
+                        if len(prog) >= 2:
+                            st.success("Program confirmed! Export below.")
+                            st.markdown("### Export")
+                            ec1, ec2 = st.columns(2)
+                            ec1.download_button("Download as CSV", data=export_csv(prog),
+                                                file_name="concert_program.csv", mime="text/csv")
+                            ec2.download_button("Download program sheet", data=export_text(prog),
+                                                file_name="concert_program.txt", mime="text/plain")
 
     # ==================================================================
     # TAB 3: About the Data
