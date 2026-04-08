@@ -635,6 +635,280 @@ def export_text(prog):
 
 
 # ---------------------------------------------------------------------------
+# Shuffle the Deck — thematic program generator
+# ---------------------------------------------------------------------------
+
+THEME_DECKS = [
+    {
+        "name": "Something Old, Something New, Something Borrowed, Something Blue",
+        "emoji": "💍",
+        "description": "The wedding toast of concert programs.",
+        "slots": [
+            {
+                "label": "Something Old",
+                "hint": "A piece composed before 1960",
+                "match": lambda df: df[df["Year"].apply(
+                    lambda y: pd.notna(y) and float(y) < 1960
+                )] if "Year" in df.columns else df[df["Title"].fillna("").str.contains(
+                    "Suite of Old|Ancient|Antique|Renaissance|Baroque|Gregorian|Holst|Grainger|Sousa",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "Something New",
+                "hint": "A piece composed after 2015",
+                "match": lambda df: df[df["Year"].apply(
+                    lambda y: pd.notna(y) and float(y) > 2015
+                )] if "Year" in df.columns else df[df["Title"].fillna("").str.contains(
+                    "New|Modern|Future|Tomorrow|Dawn|Arise",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "Something Borrowed",
+                "hint": "A transcription or arrangement",
+                "match": lambda df: df[
+                    df["Categories"].fillna("").str.contains("Transcription|Arrangement", case=False, regex=True)
+                ] if "Categories" in df.columns else df[df["Arranger"].notna() & (df["Arranger"].astype(str).str.strip() != "")],
+            },
+            {
+                "label": "Something Blue",
+                "hint": "A piece with 'blue' in the title",
+                "match": lambda df: df[df["Title"].fillna("").str.contains("blue", case=False, regex=False)],
+            },
+        ],
+    },
+    {
+        "name": "Don't Whiz on the Electric Fence",
+        "emoji": "⚡",
+        "description": "A Ren & Stimpy life lesson, in three movements.",
+        "slots": [
+            {
+                "label": "The Dare",
+                "hint": "Something bold and reckless",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Bold|Brave|Dare|Fierce|Wild|Frenzy|Rush|Charge|Reckless|Rebel|Fortune Favors",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "The Fence",
+                "hint": "Electricity, lightning, or shock",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Electric|Lightning|Thunder|Shock|Spark|Volt|Storm|Tempest|Surge|Flash|Blitz|Jolt",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "The Lesson Learned",
+                "hint": "A lament, elegy, or reflection",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Elegy|Lament|Requiem|Gentle|Prayer|Solace|Solitude|Rest|Peace|Heal|Comfort|Sorrow",
+                    case=False, regex=True)],
+            },
+        ],
+    },
+    {
+        "name": "The Good, the Bad, and the Ugly",
+        "emoji": "🤠",
+        "description": "A Sergio Leone triple feature for your concert hall.",
+        "slots": [
+            {
+                "label": "The Good",
+                "hint": "Highest-rated piece — the hero rides in",
+                "match": lambda df: df.nlargest(50, "Best Bet") if "Best Bet" in df.columns and df["Best Bet"].notna().any() else df.head(50),
+            },
+            {
+                "label": "The Bad",
+                "hint": "Something dark, villainous, or ominous",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Dark|Devil|Black|Evil|Sinister|Wicked|Shadow|Doom|Diabolique|Macabre|Villain|Inferno|Chaos|Venom",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "The Ugly",
+                "hint": "A grotesque, circus, or novelty piece",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Circus|Grotesque|Galop|Polka|Carnival|Clown|Bizarre|Freak|Goblin|Troll|Monster|Gargoyle|Ogre",
+                    case=False, regex=True)],
+            },
+        ],
+    },
+    {
+        "name": "What Doesn't Kill You Makes You Stronger",
+        "emoji": "💪",
+        "description": "Nietzsche's pep talk, scored for wind ensemble.",
+        "slots": [
+            {
+                "label": "The Trial",
+                "hint": "Conflict, struggle, or battle",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Battle|War|Conflict|Struggle|Fight|Siege|Storm|Clash|Crisis|Peril|Dragon|Sword|Shield|Warrior",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "The Reckoning",
+                "hint": "Darkness, loss, or mourning",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Elegy|Fallen|Lost|Requiem|Lament|Dark|Night|Sorrow|Ruin|Ashes|Ghost|Haunted|Grave|Weep",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "The Comeback",
+                "hint": "Triumph, light, or redemption",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Triumph|Victory|Rise|Aurora|Dawn|Light|Glory|Resurrection|Phoenix|Awakening|Jubil|Fanfare|Rejoice|Exultation",
+                    case=False, regex=True)],
+            },
+        ],
+    },
+    {
+        "name": "Lions and Tigers and Bears, Oh My!",
+        "emoji": "🦁",
+        "description": "Follow the yellow brick road through the animal kingdom.",
+        "slots": [
+            {
+                "label": "Lions",
+                "hint": "Big cats, pride, and majesty",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Lion|Cat|Panther|Jaguar|Tiger|Leopard|Prowl|Roar|Pride|Claw|Paw|Feline|Gato",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "Tigers",
+                "hint": "Birds and flight",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Bird|Eagle|Hawk|Falcon|Raven|Crow|Phoenix|Wing|Fly|Flight|Soar|Dove|Swan|Firebird|Thunderbird|Lark|Robin",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "Bears",
+                "hint": "Wolves, dogs, and creatures of the forest",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Wolf|Bear|Fox|Hound|Hunt|Forest|Creature|Beast|Wild|Frog|Dragon|Serpent|Spider",
+                    case=False, regex=True)],
+            },
+        ],
+    },
+    {
+        "name": "Red Sky at Night, Sailor's Delight",
+        "emoji": "🌅",
+        "description": "The old mariner's weather forecast.",
+        "slots": [
+            {
+                "label": "Red Sky at Night",
+                "hint": "Sunset, evening, twilight",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Sunset|Twilight|Evening|Dusk|Night|Nocturne|Vesper|Red Sky|Crimson|Scarlet|Afterglow",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "Sailor's Delight",
+                "hint": "Sea, ships, calm waters",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Sea|Sail|Ship|Ocean|Harbor|Port|Voyage|Wave|Tide|Shore|Coast|Anchor|Shanty|Mariner|Navy|Nautical|Bay|Cove",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "Red Sky at Morning",
+                "hint": "Storm, danger, tempest",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Storm|Tempest|Thunder|Hurricane|Maelstrom|Fury|Rage|Turmoil|Squall|Gale|Torrent|Cyclone|Whirlwind",
+                    case=False, regex=True)],
+            },
+        ],
+    },
+    {
+        "name": "If You Can't Stand the Heat, Get Out of the Kitchen",
+        "emoji": "🔥",
+        "description": "Harry Truman's concert program.",
+        "slots": [
+            {
+                "label": "Turn Up the Heat",
+                "hint": "Fire, flame, and heat",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Fire|Flame|Burn|Inferno|Blaze|Ember|Scorch|Forge|Volcano|Lava|Pyre|Furnace|Heat|Molten|Ignite",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "Too Hot to Handle",
+                "hint": "Fast, furious, and virtuosic",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Toccata|Presto|Prestissimo|Galop|Frenzy|Fury|Whirlwind|Race|Rush|Velocity|Perpetual Motion|Allegro",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "Cool Down",
+                "hint": "Ice, winter, and calm",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Ice|Frost|Snow|Winter|Cold|Frozen|Crystal|Cool|Chill|Arctic|Glacier|Polar|Bleak Midwinter",
+                    case=False, regex=True)],
+            },
+        ],
+    },
+    {
+        "name": "The Grass Is Always Greener",
+        "emoji": "🌿",
+        "description": "A pastoral program about longing for what's on the other side.",
+        "slots": [
+            {
+                "label": "Our Green Pastures",
+                "hint": "Home, pastoral, and familiar",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Pastoral|Green|Meadow|Field|Garden|Valley|Home|Village|Country|Folk|Shenandoah|Kentucky|Appalachia",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "Over the Fence",
+                "hint": "Journey, wandering, or distant lands",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Journey|Quest|Voyage|Adventure|Wander|Pilgrimage|Odyssey|Passage|Expedition|Trail|Path|Traveler|Nomad|Roam",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "Somewhere Over the Rainbow",
+                "hint": "Dreams, fantasy, or utopia",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Dream|Fantasy|Fantasia|Magic|Enchant|Wonder|Fairy|Myth|Legend|Imagine|Wish|Castle|Kingdom|Emerald",
+                    case=False, regex=True)],
+            },
+        ],
+    },
+]
+
+
+def deal_theme_program(theme, source_df, grade_range=None):
+    """Pick one random piece per slot from matching pieces."""
+    import random
+    program = []
+    used_titles = set()
+
+    pool = source_df.copy()
+    if grade_range and "Grade" in pool.columns:
+        pool = pool[(pool["Grade"] >= grade_range[0]) & (pool["Grade"] <= grade_range[1])]
+
+    for slot in theme["slots"]:
+        try:
+            matches = slot["match"](pool)
+        except Exception:
+            matches = pd.DataFrame()
+
+        # Exclude already-used titles
+        if not matches.empty:
+            matches = matches[~matches["Title"].isin(used_titles)]
+
+        if matches.empty:
+            program.append(None)
+        else:
+            # Weighted random: prefer higher Best Bet
+            if "Best Bet" in matches.columns and matches["Best Bet"].notna().any():
+                weights = matches["Best Bet"].fillna(0).clip(lower=1)
+                pick = matches.sample(1, weights=weights).iloc[0]
+            else:
+                pick = matches.sample(1).iloc[0]
+            program.append(pick.to_dict())
+            used_titles.add(pick["Title"])
+
+    return program
+
+
+# ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 
@@ -652,7 +926,8 @@ def main():
     orch_df, orch_err = safe_load(load_orchestra, "Orchestra")
     pairings_data = load_pairings()
 
-    tab1, tab2, tab3 = st.tabs(["Browse Repertoire", "Build a Program", "About the Data"])
+    tab1, tab2, tab3, tab4 = st.tabs(["Browse Repertoire", "Build a Program",
+                                       "Shuffle the Deck", "About the Data"])
 
     # ==================================================================
     # TAB 1: Browse
@@ -1063,9 +1338,93 @@ def main():
                                                 file_name="concert_program.txt", mime="text/plain")
 
     # ==================================================================
-    # TAB 3: About the Data
+    # TAB 3: Shuffle the Deck
     # ==================================================================
     with tab3:
+        st.markdown("### Shuffle the Deck")
+        st.markdown("Pick an aphorism. We'll deal you a thematic concert program from the database. "
+                    "Hit **Deal again** to reshuffle.")
+
+        db_deck = st.radio("Database", ["Band", "Orchestra"], horizontal=True, key="deck_db")
+        is_band_deck = db_deck == "Band"
+
+        if is_band_deck:
+            if band_err:
+                st.error(band_err)
+            else:
+                deck_source = band_df.copy()
+        else:
+            if orch_err:
+                st.error(orch_err)
+            else:
+                deck_source = orch_df.copy()
+
+        if (is_band_deck and not band_err) or (not is_band_deck and not orch_err):
+            # Grade range filter
+            grades_avail = sorted(deck_source["Grade"].dropna().unique())
+            if grades_avail:
+                g_min, g_max = st.select_slider(
+                    "Grade range",
+                    options=grades_avail,
+                    value=(min(grades_avail), max(grades_avail)),
+                    key="deck_grade",
+                )
+                grade_filter = (g_min, g_max)
+            else:
+                grade_filter = None
+
+            # Pick a theme
+            theme_names = [f"{t['emoji']}  {t['name']}" for t in THEME_DECKS]
+            chosen = st.selectbox("Pick your poison", theme_names, index=None,
+                                  key="deck_theme", placeholder="Choose an aphorism...")
+
+            if chosen is not None:
+                theme_idx = theme_names.index(chosen)
+                theme = THEME_DECKS[theme_idx]
+
+                st.markdown(f"### {theme['emoji']} {theme['name']}")
+                st.caption(theme["description"])
+
+                # Deal button / initial deal
+                if "deck_seed" not in st.session_state:
+                    st.session_state["deck_seed"] = 0
+
+                if st.button("Deal again", key="deck_reshuffle", type="secondary"):
+                    st.session_state["deck_seed"] += 1
+
+                import random
+                random.seed(st.session_state["deck_seed"] + theme_idx)
+
+                program = deal_theme_program(theme, deck_source, grade_filter)
+
+                st.markdown("---")
+                all_found = True
+                prog_dicts = []
+                for i, slot in enumerate(theme["slots"]):
+                    piece = program[i]
+                    st.markdown(f'**{slot["label"]}** — *{slot["hint"]}*')
+                    if piece is None:
+                        st.warning("No match found for this slot. Try a wider grade range or a different database.")
+                        all_found = False
+                    else:
+                        prog_dicts.append(piece)
+                        row_series = pd.Series(piece)
+                        render_piece_card(row_series, None, deck_source, is_band_deck)
+                    st.markdown("")
+
+                if all_found and prog_dicts:
+                    st.markdown("---")
+                    st.markdown("### Export this ridiculous program")
+                    ec1, ec2 = st.columns(2)
+                    ec1.download_button("Download as CSV", data=export_csv(prog_dicts),
+                                        file_name="themed_program.csv", mime="text/csv")
+                    ec2.download_button("Download program sheet", data=export_text(prog_dicts),
+                                        file_name="themed_program.txt", mime="text/plain")
+
+    # ==================================================================
+    # TAB 4: About the Data
+    # ==================================================================
+    with tab4:
         st.markdown("### How this tool works")
         st.markdown("""
 This tool brings together several sources of information to help you make
