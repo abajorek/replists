@@ -931,8 +931,9 @@ def main():
     orch_df, orch_err = safe_load(load_orchestra, "Orchestra")
     pairings_data = load_pairings()
 
-    tab1, tab2, tab3, tab4 = st.tabs(["Browse Repertoire", "Build a Program",
-                                       "Shuffle the Deck", "About the Data"])
+    tab1, tab2, tab3, tab4, tab5 = st.tabs(["Browse Repertoire", "Build a Program",
+                                            "Shuffle the Deck", "About the Data",
+                                            "The Tuba of Fate"])
 
     # ==================================================================
     # TAB 1: Browse
@@ -1525,6 +1526,18 @@ selected independently of the other concert pieces.
                    "Kreines Concert Repertoire Guide, Band Directors Guide, "
                    "Institute for Composer Diversity, 22 state prescribed music lists, "
                    "Colorado Bandmasters Association PML, SCSBOA (CA), PMEA (PA).")
+
+    # ==================================================================
+    # TAB 5: The Tuba of Fate
+    # ==================================================================
+    with tab5:
+        st.markdown("### The Tuba of Fate")
+        st.markdown("An interactive choose-your-own-adventure for selecting concert repertoire.")
+        st.link_button(
+            "Play The Tuba of Fate",
+            "https://claude.ai/public/artifacts/e87fc043-7693-4fb9-ab85-c9a357381543",
+            type="primary",
+        )
 
 
 if __name__ == "__main__":
