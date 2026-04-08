@@ -21,40 +21,70 @@ st.set_page_config(
 
 st.markdown("""
 <style>
-    /* Header bar */
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap');
+
+    /* Header bar — A's green with gold accent, muted film aesthetic */
     .main-header {
-        background: linear-gradient(135deg, #7B2D26 0%, #A13D34 100%);
+        background: linear-gradient(135deg, #003831 0%, #0A4A40 60%, #1A5C50 100%);
         color: white;
-        padding: 1.2rem 2rem;
+        padding: 1.5rem 2rem;
         border-radius: 10px;
         margin-bottom: 1.5rem;
+        border-bottom: 3px solid #C8962E;
     }
-    .main-header h1 { color: white; margin: 0; font-size: 1.8rem; }
-    .main-header p { color: #F5E6C8; margin: 0.3rem 0 0 0; font-size: 0.95rem; }
+    .main-header h1 {
+        color: white;
+        margin: 0;
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 800;
+        font-size: 2.2rem;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+    }
+    .main-header .tagline {
+        color: #D4A843;
+        margin: 0.3rem 0 0 0;
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 600;
+        font-size: 0.85rem;
+        letter-spacing: 0.04em;
+    }
+    .main-header .quote {
+        color: #8FBFB0;
+        margin: 0.5rem 0 0 0;
+        font-size: 0.82rem;
+        font-style: italic;
+    }
 
-    /* Piece detail card */
+    /* Piece detail card — warm cream, green accent */
     .detail-card {
-        background: #FDF8F0;
-        border: 1px solid #E8D5B5;
-        border-radius: 10px;
+        background: #F7F4EE;
+        border: 1px solid #D6CEBB;
+        border-left: 3px solid #003831;
+        border-radius: 6px;
         padding: 1.2rem 1.5rem;
         margin: 0.8rem 0;
     }
-    .detail-card h4 { color: #7B2D26; margin: 0 0 0.3rem 0; }
+    .detail-card h4 {
+        color: #003831;
+        margin: 0 0 0.3rem 0;
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 700;
+    }
     .detail-card .meta { color: #6B6B6B; font-size: 0.9rem; }
 
     /* Pairing card */
     .pairing-card {
-        background: #F0F4F8;
-        border: 1px solid #D0D8E0;
-        border-radius: 8px;
+        background: #EFF3F0;
+        border: 1px solid #C5D1C8;
+        border-radius: 6px;
         padding: 0.7rem 1rem;
         margin: 0.4rem 0;
     }
 
-    /* Program sidebar piece */
+    /* Program sidebar piece — gold left border */
     .program-piece {
-        background: #FDF8F0;
+        background: #F7F4EE;
         border-left: 3px solid #C8962E;
         padding: 0.5rem 0.8rem;
         margin-bottom: 0.4rem;
@@ -63,30 +93,43 @@ st.markdown("""
 
     /* Step indicator */
     .step-indicator {
-        background: #7B2D26;
-        color: white;
+        background: #003831;
+        color: #D4A843;
         display: inline-block;
         width: 28px; height: 28px;
         border-radius: 50%;
         text-align: center;
         line-height: 28px;
-        font-weight: 600;
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 700;
         font-size: 0.85rem;
         margin-right: 8px;
     }
     .step-inactive {
-        background: #D0D0D0;
+        background: #C5C5C5;
+        color: white;
     }
 
-    /* Metrics */
+    /* Metrics — muted cream with green text */
     [data-testid="stMetric"] {
-        background: #FDF8F0;
-        border: 1px solid #E8D5B5;
+        background: #F7F4EE;
+        border: 1px solid #D6CEBB;
         padding: 0.8rem;
-        border-radius: 8px;
+        border-radius: 6px;
+    }
+    [data-testid="stMetricValue"] {
+        color: #003831;
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 700;
     }
 
-    [data-testid="stSidebar"] { background-color: #FAFAFA; }
+    [data-testid="stSidebar"] { background-color: #F5F3EE; }
+
+    /* Tab styling */
+    button[data-baseweb="tab"] {
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 600;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -917,13 +960,27 @@ def deal_theme_program(theme, source_df, grade_range=None):
 # Main
 # ---------------------------------------------------------------------------
 
+MONEYBALL_QUOTES = [
+    '"It\'s about getting things down to one number." — Peter Brand',
+    '"People are overlooked for biased reasons." — Peter Brand',
+    '"The first guy through the wall always gets bloody." — John Henry',
+    '"There are rich teams and poor teams. Then there\'s fifty feet of crap, and then there\'s us."',
+    '"You don\'t put a team together with a computer." "No. What you don\'t do is think about it."',
+    '"We\'re going to find value where nobody else can find it."',
+]
+
+
 def main():
     init_program()
 
-    st.markdown("""
+    import hashlib, datetime
+    quote_idx = int(hashlib.md5(str(datetime.date.today()).encode()).hexdigest(), 16) % len(MONEYBALL_QUOTES)
+
+    st.markdown(f"""
     <div class="main-header">
         <h1>Moneyband</h1>
-        <p>Data-driven repertoire decisions · <em>"Adapt or die."</em></p>
+        <div class="tagline">DATA-DRIVEN REPERTOIRE DECISIONS</div>
+        <div class="quote">{MONEYBALL_QUOTES[quote_idx]}</div>
     </div>
     """, unsafe_allow_html=True)
 
