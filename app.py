@@ -438,6 +438,9 @@ def render_piece_card(row, pairings_data, source_df, is_band, show_add=False, pr
         sc = row.get("Street Cred", "")
         if pd.notna(sc) and str(sc).strip():
             st.markdown(f"**Professional endorsement:** {float(sc):.2f}")
+        pct_sup = row.get("% Superior", "")
+        if pd.notna(pct_sup) and str(pct_sup).strip():
+            st.markdown(f"**Superior rate:** {float(pct_sup):.1f}%")
         tp = row.get("Total Perfs", "")
         if pd.notna(tp) and str(tp).strip():
             st.markdown(f"**Times performed at festival:** {int(tp):,}")
@@ -463,6 +466,15 @@ def render_piece_card(row, pairings_data, source_df, is_band, show_add=False, pr
         ens = row.get("Ensemble", "")
         if pd.notna(ens) and str(ens).strip():
             st.markdown(f"**Ensemble:** {ens}")
+        tmtp_march = row.get("TMTP March", "")
+        if str(tmtp_march) == "True":
+            st.markdown("**TMTP March Collection:** Yes")
+        dir1 = row.get("Dir Tier 1", "")
+        dir2 = row.get("Dir Tier 2", "")
+        if pd.notna(dir1) and str(dir1).strip():
+            st.markdown("**Prestige director pick:** Tier 1")
+        elif pd.notna(dir2) and str(dir2).strip():
+            st.markdown("**Prestige director pick:** Tier 2")
         cba = row.get("On CBA PML", "")
         if pd.notna(cba) and str(cba).strip():
             st.markdown("**On CBA Prescribed Music List:** Yes")
@@ -861,7 +873,7 @@ def main():
                         sel_pair_2 = pairs[pair_options_2.index(swap_2)]
                         db_row_2 = find_piece_in_db(sel_pair_2["title"], sel_pair_2["composer"], source_pb)
                         if db_row_2 is not None:
-                            render_piece_card(db_row_2, pairings_data, source_pb, is_band_pb)
+                            render_piece_card(db_row_2, None, source_pb, is_band_pb)
                         else:
                             st.markdown(f"**{sel_pair_2['title']}** — {sel_pair_2['composer']}")
                             st.caption("Not in the current database — no additional details available.")
@@ -981,7 +993,7 @@ def main():
                         sel_pair_2 = pairs[pair_options_2.index(swap_2)]
                         db_row_2 = find_piece_in_db(sel_pair_2["title"], sel_pair_2["composer"], source_pb)
                         if db_row_2 is not None:
-                            render_piece_card(db_row_2, pairings_data, source_pb, is_band_pb)
+                            render_piece_card(db_row_2, None, source_pb, is_band_pb)
                         else:
                             st.markdown(f"**{sel_pair_2['title']}** — {sel_pair_2['composer']}")
                             st.caption("Not in the current database — no additional details available.")
@@ -1006,7 +1018,7 @@ def main():
                             sel_pair_3 = remaining[pair_options_3.index(swap_3)]
                             db_row_3 = find_piece_in_db(sel_pair_3["title"], sel_pair_3["composer"], source_pb)
                             if db_row_3 is not None:
-                                render_piece_card(db_row_3, pairings_data, source_pb, is_band_pb)
+                                render_piece_card(db_row_3, None, source_pb, is_band_pb)
                             else:
                                 st.markdown(f"**{sel_pair_3['title']}** — {sel_pair_3['composer']}")
                                 st.caption("Not in the current database — no additional details available.")
