@@ -1,5 +1,5 @@
 """
-Repertoire Database Explorer
+Moneyband
 """
 
 import streamlit as st
@@ -13,7 +13,7 @@ import json
 # ---------------------------------------------------------------------------
 
 st.set_page_config(
-    page_title="Repertoire Explorer",
+    page_title="Moneyband",
     page_icon="🎵",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -635,7 +635,7 @@ def export_text(prog):
     has_div = any(pd.notna(p.get("ICD Diversity")) and str(p.get("ICD Diversity", "")).strip() for p in prog)
     lines.append(f"Underrepresented composer included (ICD): {'Yes' if has_div else 'No'}")
     lines.append("")
-    lines.append("Generated with Repertoire Database Explorer")
+    lines.append("Generated with Moneyband")
     return "\n".join(lines)
 
 
@@ -922,8 +922,8 @@ def main():
 
     st.markdown("""
     <div class="main-header">
-        <h1>Repertoire Database Explorer</h1>
-        <p>Browse vetted repertoire · Build adjudicated concert programs</p>
+        <h1>Moneyband</h1>
+        <p>Data-driven repertoire decisions · <em>"Adapt or die."</em></p>
     </div>
     """, unsafe_allow_html=True)
 
