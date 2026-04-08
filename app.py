@@ -1554,6 +1554,52 @@ selected independently of the other concert pieces.
         """)
 
         st.markdown("---")
+        st.markdown("### Programming guide")
+        st.markdown("""
+**Building a strong adjudicated concert program** requires balancing musical
+merit, ensemble capability, and strategic awareness. These principles are
+synthesized from FBA mentoring resources, OrchestraTeacher.net, UIL performance
+requirements, and experienced adjudicators.
+
+**1. Play to your strengths, not your ego.**
+Choose music that showcases your ensemble's strongest sections. Avoid pieces
+that feature prominent solos for struggling players or expose weak sections.
+"It is not difficult to play difficult music poorly." — James Sammons
+
+**2. Right difficulty, right time.**
+Program one grade above your ensemble's comfortable reading level at most.
+If students are spending rehearsals learning notes instead of making music,
+the piece is too hard. MPA preparation is for refinement, not remediation.
+
+**3. Contrast is everything.**
+A strong program has variety in tempo, style, key, and character. If your
+first piece is fast and loud, your second should breathe. Judges notice —
+and reward — thoughtful programming.
+
+**4. Know the requirements.**
+- **Band (UIL/FBA):** Typically march + two concert pieces from the prescribed list.
+- **Orchestra (UIL):** Three pieces; first from prescribed list, second from grade-appropriate list, third from any source. No two pieces by the same composer.
+- **Orchestra (FOA):** Two from the FOA music list, third from any source. Classification is determined by the *director* based on the level of music chosen, not school size.
+
+**5. The first and last two minutes matter most.**
+Open strong, close strong. Judges are human — first impressions and final
+impressions carry disproportionate weight.
+
+**6. Transcriptions demand extra work.**
+Orchestral transcriptions require studying the original score. Edit doublings,
+match the orchestral style and texture. Only program transcriptions if your
+ensemble can perform them with the refinement they demand.
+
+**7. Plan for real rehearsal time.**
+Assume 70–80% of your scheduled time is effective rehearsal. A typical
+program should include pieces totaling 10–15 minutes. Don't overschedule.
+
+**8. Include underrepresented voices.**
+Programs that include diverse composers demonstrate musical breadth and
+reflect the full landscape of the profession. Use the ICD filter to explore.
+        """)
+
+        st.markdown("---")
 
         col1, col2 = st.columns(2)
 
