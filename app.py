@@ -871,6 +871,286 @@ THEME_DECKS = [
         ],
     },
     {
+        "name": "I Told You Not to Eat That",
+        "emoji": "🤢",
+        "description": "Every potluck has consequences.",
+        "slots": [
+            {
+                "label": "The Appetizer",
+                "hint": "A bright, inviting opener — come on in",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Feast|Festival|Fiesta|Carnival|Celebration|Merry|Overture|Welcome|Invitation|Opening",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "The Main Course",
+                "hint": "Rich, indulgent, heavy",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Grand|Noble|Majest|Royal|Imperial|Regal|Resplendent|Magnificent|Opulent|Sumptuous|Glorious",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "The Rumble",
+                "hint": "Something isn't sitting right",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Rumble|Growl|Roar|Thunder|Rolling|Turmoil|Turbulence|Tremor|Shake|Quake|Churn|Tumult|Upheaval",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "The Sprint",
+                "hint": "A sudden urgent rush",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Rush|Dash|Race|Gallop|Flight|Escape|Presto|Prestissimo|Stampede|Frenzy|Whirlwind|Toccata",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "The Aftermath",
+                "hint": "Lying down, reflecting on poor decisions",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Rest|Sleep|Slumber|Dream|Lullaby|Gentle|Still|Calm|Requiem|Solace|Recovery|Peace|Adagio",
+                    case=False, regex=True)],
+            },
+        ],
+    },
+    {
+        "name": "Hold My Beer",
+        "emoji": "🍺",
+        "description": "The last words before every great story.",
+        "slots": [
+            {
+                "label": "The Boast",
+                "hint": "Heroic, confident, full of swagger",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Fanfare|Heroic|Triumphant|Bold|Noble|Proud|Valor|Glory|Gallant|Champion|Conquer|Invincible",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "Hold My Beer",
+                "hint": "A moment of stillness before the chaos",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Prelude|Moment|Pause|Breath|Threshold|Precipice|Calm|Suspended|Wait|Anticipation|Stillness",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "The Attempt",
+                "hint": "Wild, reckless, full speed ahead",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Wild|Frenzy|Fury|Chaos|Whirlwind|Stampede|Galop|Charge|Ride|Rampage|Madness|Circus|Boom",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "The Hospital",
+                "hint": "Elegy, lament, or slow recovery",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Elegy|Lament|Broken|Fallen|Requiem|Heal|Comfort|Gentle|Tender|Sorrow|Wound|Mercy|Grace",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "The Legend",
+                "hint": "Retelling the story — it was totally worth it",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Legend|Tale|Story|Saga|Epic|Ballad|Chronicle|Myth|Fable|Folklore|Odyssey|Adventure|Memory",
+                    case=False, regex=True)],
+            },
+        ],
+    },
+    {
+        "name": "Famous Last Words",
+        "emoji": "💀",
+        "description": "\"What's the worst that could happen?\"",
+        "slots": [
+            {
+                "label": "\"I've Got This\"",
+                "hint": "Confident march or fanfare",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "March|Fanfare|Procession|Parade|Salute|Allegiance|Resolute|Onward|Forward|Advance|Intrepid",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "\"Watch This\"",
+                "hint": "Flashy, virtuosic, showing off",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Toccata|Perpetual|Scherzo|Caprice|Galop|Prestissimo|Dazzle|Brilliant|Virtuos|Acrobat|Spectacle",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "\"Uh Oh\"",
+                "hint": "Dark turn — something went very wrong",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Dark|Sinister|Ominous|Shadow|Doom|Dread|Peril|Abyss|Descent|Plunge|Fall|Catastrophe|Havoc",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "\"Tell My Story\"",
+                "hint": "Memorial, elegy, or farewell",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Memorial|Elegy|Farewell|Requiem|Remember|In Memoriam|Tribute|Dirge|Last|Final|Eternal Rest",
+                    case=False, regex=True)],
+            },
+        ],
+    },
+    {
+        "name": "That's Not a Knife... THIS Is a Knife",
+        "emoji": "🔪",
+        "description": "Crocodile Dundee's guide to dynamic contrast.",
+        "slots": [
+            {
+                "label": "\"That's Not a Knife\"",
+                "hint": "Small, delicate, miniature",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Little|Small|Miniature|Petite|Tiny|Minor|Simple|Serenade|Arietta|Berceuse|Lullaby|Bagatelle",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "\"THIS Is a Knife\"",
+                "hint": "Massive, colossal, overwhelming",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Grand|Great|Mighty|Colossal|Titan|Epic|Majestic|Symphonic|Monumental|Enormous|Colossus|Mammoth",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "The Outback",
+                "hint": "Wide open, rugged, adventurous",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Prairie|Desert|Plain|Frontier|Pioneer|Wilderness|Outpost|Canyon|Mesa|Horizon|Vast|Open|Range",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "The Crocodile",
+                "hint": "Danger, predator, primal",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Dragon|Serpent|Beast|Predator|Prowl|Savage|Feral|Primal|Venom|Fang|Claw|Lair|Hunter|Creature",
+                    case=False, regex=True)],
+            },
+        ],
+    },
+    {
+        "name": "The Floor Is Lava",
+        "emoji": "🌋",
+        "description": "The childhood game that prepared you for concert programming.",
+        "slots": [
+            {
+                "label": "Safe Ground",
+                "hint": "Solid, grounded, secure",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Home|Foundation|Ground|Earth|Rock|Stone|Fortress|Stronghold|Refuge|Shelter|Abide|Stand",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "THE FLOOR IS LAVA",
+                "hint": "Panic — volcanic, explosive, fiery",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Volcano|Lava|Eruption|Fire|Flame|Inferno|Blaze|Molten|Scorch|Furnace|Explosion|Cataclysm",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "Jump!",
+                "hint": "Leaping, flying, frantic motion",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Flight|Fly|Soar|Leap|Jump|Spring|Bounce|Dance|Galop|Whirlwind|Rush|Dash|Acrobat|Airborne",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "Clinging to the Couch",
+                "hint": "Hanging on — suspense, tension, uncertainty",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Suspense|Tension|Edge|Cliff|Precipice|Peril|Dread|Anxious|Tremor|Balance|Tightrope|Pendulum|Fate",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "Sweet Relief",
+                "hint": "Made it — joy, triumph, survival",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Relief|Joy|Jubil|Triumph|Victory|Celebration|Rejoice|Exult|Hallelujah|Salvation|Deliverance|Alive",
+                    case=False, regex=True)],
+            },
+        ],
+    },
+    {
+        "name": "What Happens in Vegas Stays in Vegas",
+        "emoji": "🎰",
+        "description": "Sin City's concert programming philosophy.",
+        "slots": [
+            {
+                "label": "The Arrival",
+                "hint": "Glitz, neon, spectacle",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Star|Sparkle|Dazzle|Brilliant|Neon|Light|Glow|Radiant|Spectacle|Shimmer|Glitter|City|Skyline",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "The Roll of the Dice",
+                "hint": "Chance, fate, risk",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Fortune|Fate|Chance|Gamble|Risk|Dare|Destiny|Wheel|Luck|Twist|Random|Roulette",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "The Show",
+                "hint": "Showtime — jazz, swing, big band energy",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Jazz|Swing|Boogie|Blues|Rag|Ragtime|Bebop|Groove|Big Band|Cabaret|Burlesque|Show|Broadway|Satin",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "3 AM",
+                "hint": "The quiet hours — nocturne, solitude",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Nocturne|Night|Moon|Midnight|Lonely|Solitude|Alone|Shadow|Quiet|Silence|Empty|Reflection",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "The Walk of Shame",
+                "hint": "A slow, weary march home",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Funeral|Dirge|March|Procession|Slow|Weary|Trudge|Lament|Farewell|Departure|Morning|Dawn|Sunrise",
+                    case=False, regex=True)],
+            },
+        ],
+    },
+    {
+        "name": "If It Ain't Broke, Don't Fix It",
+        "emoji": "🔧",
+        "description": "But it IS broke. And you made it worse.",
+        "slots": [
+            {
+                "label": "Working Just Fine",
+                "hint": "Orderly, elegant, classic",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Suite|Overture|Sonata|Sinfonia|Concerto|Prelude|Chorale|Hymn|Aria|Serenade|Pastorale|Aubade",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "\"Let Me Try Something\"",
+                "hint": "Variations, experiments, tinkering",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Variation|Theme|Fantasia|Fantasy|Rhapsod|Improvisation|Invention|Experiment|Exploration|Sketch",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "The Extra Screw",
+                "hint": "Something's loose — scherzo, off-kilter, mischief",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Scherzo|Caprice|Capriccio|Grotesque|Bizarre|Jest|Clown|Circus|Puck|Mischief|Trick|Comic|Frolic",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "It's Definitely Broke Now",
+                "hint": "Total chaos — crashing, disintegrating",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Chaos|Crash|Storm|Fury|Frenzy|Havoc|Mayhem|Rage|Destruction|Shatter|Eruption|Cataclysm|Apocalypse",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "Calling a Professional",
+                "hint": "Order restored — hymn, chorale, resolution",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Hymn|Chorale|Heal|Restore|Redeem|Grace|Salvation|Deliverance|Resolution|Resolve|Renewal|Amen",
+                    case=False, regex=True)],
+            },
+        ],
+    },
+    {
         "name": "The Good, the Bad, and the Ugly",
         "emoji": "🤠",
         "description": "A Sergio Leone triple feature for your concert hall.",
@@ -1036,6 +1316,370 @@ THEME_DECKS = [
             },
         ],
     },
+    {
+        "name": "A Journey of a Thousand Miles Begins with a Single Step",
+        "emoji": "👣",
+        "description": "Lao Tzu's travel guide, in five movements.",
+        "slots": [
+            {
+                "label": "The Single Step",
+                "hint": "A quiet beginning — simple, tentative, small",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Simple|Gentle|Prelude|Whisper|Still|Calm|Serene|Morning|First|Begin|Tender|Lullaby",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "The Open Road",
+                "hint": "Walking, traveling, moving forward",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "March|Walk|Road|Path|Trail|Step|Procession|Parade|Journey|Passage|Stride",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "The Mountain Pass",
+                "hint": "Climbing, struggle, high places",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Mountain|Summit|Peak|Climb|Ascend|Ridge|Highland|Crest|Everest|Alp|Sierra|Height",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "The Valley Below",
+                "hint": "Rest, reflection, a quiet middle",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Valley|River|Stream|Meadow|Rest|Serenade|Nocturne|Reverie|Solitude|Pastoral",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "The Thousand Miles",
+                "hint": "Arrival, triumph, a grand destination",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Triumph|Jubil|Celebration|Fanfare|Festival|Finale|Glory|Crown|Hallelujah|Rejoice|Exalt",
+                    case=False, regex=True)],
+            },
+        ],
+    },
+    {
+        "name": "Every Cloud Has a Silver Lining",
+        "emoji": "⛅",
+        "description": "Optimism, scored for concert band.",
+        "slots": [
+            {
+                "label": "Gathering Clouds",
+                "hint": "Approaching darkness or uncertainty",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Cloud|Shadow|Mist|Fog|Haze|Gray|Overcast|Veil|Shroud|Obscure|Gloom|Dusk",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "The Downpour",
+                "hint": "Storm, rain, turbulence",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Rain|Storm|Thunder|Tempest|Torrent|Flood|Deluge|Squall|Hurricane|Monsoon|Cascade",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "The Silver Lining",
+                "hint": "Light breaking through — hope, radiance",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Silver|Light|Shine|Radiant|Glow|Bright|Shimmer|Gleam|Luminous|Beacon|Ray|Sun|Golden|Brilliant",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "Clear Skies",
+                "hint": "Joy, blue sky, celebration",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Blue Sky|Joy|Jubil|Celebration|Sunburst|Morning|Clear|Bright|Hymn|Praise|Alleluia|Exult",
+                    case=False, regex=True)],
+            },
+        ],
+    },
+    {
+        "name": "Still Waters Run Deep",
+        "emoji": "🌊",
+        "description": "Quiet intensity and hidden power.",
+        "slots": [
+            {
+                "label": "Still Waters",
+                "hint": "Calm surface — serene, sustained, lyrical",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Still|Calm|Serene|Lake|Pond|Reflection|Mirror|Glass|Silent|Quiet|Tranquil|Adagio",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "The Undercurrent",
+                "hint": "Hidden motion, tension beneath beauty",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Current|Tide|Deep|Beneath|Under|Hidden|Mystery|Secret|Enigma|Labyrinth|Abyss",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "The Depths",
+                "hint": "Full power revealed — massive, elemental",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Ocean|Sea|Flood|Maelstrom|Wave|Leviathan|Poseidon|Neptune|Titan|Colossus|Force|Power",
+                    case=False, regex=True)],
+            },
+        ],
+    },
+    {
+        "name": "Rome Wasn't Built in a Day",
+        "emoji": "🏛️",
+        "description": "An empire in four movements.",
+        "slots": [
+            {
+                "label": "Laying the Foundation",
+                "hint": "Ancient, solemn, ceremonial origins",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Ancient|Stone|Foundation|Temple|Sacred|Hymn|Chant|Chorale|Gregorian|Rite|Ceremony|Procession",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "The Builders",
+                "hint": "Industry, craft, and labor",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Forge|Hammer|Iron|Steel|Machine|Engine|Build|Craft|Tower|Citadel|Fortress|Castle|Architect|Monument",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "The Empire",
+                "hint": "Roman grandeur — majesty and pageantry",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Roman|Empire|Caesar|Legion|Crown|King|Queen|Royal|Noble|Majest|Palace|Coronation|Imperial|Regal|Sovereign",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "The Fall",
+                "hint": "Crumbling, ruins, elegy for what was",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Fall|Ruin|Elegy|Requiem|Lament|Lost|Forgotten|Ashes|Dust|Decay|Farewell|Dirge|Memorial",
+                    case=False, regex=True)],
+            },
+        ],
+    },
+    {
+        "name": "Actions Speak Louder Than Words",
+        "emoji": "📢",
+        "description": "Less talk, more band.",
+        "slots": [
+            {
+                "label": "The Whisper",
+                "hint": "Words, songs, and voices — lyrical and vocal",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Song|Sing|Voice|Word|Speak|Tell|Story|Ballad|Aria|Lied|Chanson|Hymn|Prayer|Psalm|Canticle",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "The Shout",
+                "hint": "Fanfare, declaration, proclamation",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Fanfare|Declaration|Proclamation|Herald|Trumpet|Call|Clarion|Salute|Announcement|Command",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "The Action",
+                "hint": "Dance, movement, physical energy",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Dance|Danzon|Tango|Waltz|Samba|Rhumba|Polka|Galop|Tarantella|Bolero|Mambo|Salsa|Jig|Reel|Hoedown",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "The Deed",
+                "hint": "March, charge, purpose in motion",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "March|Charge|Advance|Forward|Onward|Resolute|Defiant|Stand|Courage|Valor|Honor|Allegiance",
+                    case=False, regex=True)],
+            },
+        ],
+    },
+    {
+        "name": "All That Glitters Is Not Gold",
+        "emoji": "✨",
+        "description": "Shakespeare's metallurgy lesson.",
+        "slots": [
+            {
+                "label": "The Glitter",
+                "hint": "Dazzling, bright, spectacular surface",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Star|Sparkle|Shimmer|Glitter|Dazzle|Brilliant|Diamond|Jewel|Crystal|Prism|Radiant|Celestial",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "The Gold",
+                "hint": "Something genuinely precious — golden, sun, treasure",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Gold|Sun|Treasure|Crown|Amber|Autumn|Harvest|Gilded|Bronze|Copper|Brass|Aureate",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "The Mask",
+                "hint": "Deception, illusion, hidden truth",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Mask|Phantom|Ghost|Illusion|Mirage|Shadow|Veil|Masquerade|Deception|Riddle|Enigma|Charade|Specter",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "The Real Thing",
+                "hint": "Heart, truth, sincerity — something genuine",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Heart|Soul|Spirit|Grace|Love|Hope|Faith|Promise|Devotion|Eternal|True|Abide|Endure",
+                    case=False, regex=True)],
+            },
+        ],
+    },
+    {
+        "name": "When It Rains, It Pours",
+        "emoji": "🌧️",
+        "description": "Morton Salt's concert philosophy — everything at once.",
+        "slots": [
+            {
+                "label": "The First Drop",
+                "hint": "A small, quiet beginning",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Drop|Tear|Dew|Mist|Whisper|Murmur|Ripple|Trickle|Gentle|Soft|Tender|Lullaby",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "The Drizzle",
+                "hint": "Light percussion, patter, playfulness",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Scherzo|Caprice|Capriccio|Frolic|Play|Jest|Puck|Sprite|Imp|Pixie|Mischief|Whimsy|Comic",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "The Downpour",
+                "hint": "Full ensemble, relentless energy",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Toccata|Perpetual|Frenzy|Fury|Rush|Torrent|Cascade|Flood|Deluge|Unstoppable|Relentless",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "The Thunder",
+                "hint": "Massive, dramatic, overwhelming",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Thunder|Roar|Crash|Explosion|Eruption|Cataclysm|Apocalypse|Inferno|Chaos|Maelstrom|Fury|Rage",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "After the Storm",
+                "hint": "Calm returns — clearing, peace, rainbow",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Rainbow|Peace|Calm|Clear|Serene|Heaven|Paradise|Garden|Blossom|Spring|Renewal|New Day|Sunrise",
+                    case=False, regex=True)],
+            },
+        ],
+    },
+    {
+        "name": "Where There's Smoke, There's Fire",
+        "emoji": "💨",
+        "description": "An investigation in four acts.",
+        "slots": [
+            {
+                "label": "The Smoke",
+                "hint": "Haze, mystery, something not quite right",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Smoke|Mist|Fog|Haze|Shadow|Phantom|Ghost|Vapor|Murk|Dim|Obscure|Drift",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "The Spark",
+                "hint": "Ignition — small but dangerous",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Spark|Flash|Flicker|Kindle|Ignite|Fuse|Match|Glint|Glimmer|Crackle|Snap",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "The Fire",
+                "hint": "Full blaze — fire, flame, fury",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Fire|Flame|Blaze|Inferno|Burn|Scorch|Ember|Pyre|Furnace|Volcano|Eruption|Molten",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "The Ashes",
+                "hint": "What remains — elegy, memory, rebirth",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Ash|Ember|Phoenix|Remain|Memory|Remember|Memorial|Legacy|Eternal|Endure|Rise|Rebirth",
+                    case=False, regex=True)],
+            },
+        ],
+    },
+    {
+        "name": "The Early Bird Gets the Worm",
+        "emoji": "🐦",
+        "description": "A full day of music, dawn to dark.",
+        "slots": [
+            {
+                "label": "The Early Bird",
+                "hint": "Dawn, sunrise, morning",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Dawn|Sunrise|Morning|Aurora|Daybreak|First Light|Early|Waking|Aubade",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "The Hunt",
+                "hint": "Birds, flight, pursuit",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Bird|Eagle|Hawk|Falcon|Wing|Flight|Soar|Hunt|Chase|Prey|Swift|Swoop|Sparrow|Lark|Wren",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "High Noon",
+                "hint": "Bright, bold, full energy",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Sun|Bright|Blaze|Noon|Radiant|Vivid|Bold|Brilliant|Splendid|Magnificent|Resplendent",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "The Worm Turns",
+                "hint": "A twist — something unexpected or dark",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Turn|Twist|Strange|Weird|Bizarre|Grotesque|Macabre|Sinister|Dark|Ominous|Eerie|Haunt",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "Night Owl",
+                "hint": "Night, stars, moonlight",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Night|Moon|Star|Nocturne|Midnight|Evening|Twilight|Vesper|Owl|Dream|Starlight|Constellation",
+                    case=False, regex=True)],
+            },
+        ],
+    },
+    {
+        "name": "Blood Is Thicker Than Water",
+        "emoji": "🩸",
+        "description": "Family ties and ancestral roots.",
+        "slots": [
+            {
+                "label": "The Bloodline",
+                "hint": "Heritage, ancestry, tradition",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Heritage|Ancestor|Ancient|Legacy|Tradition|Origin|Root|Lineage|Generation|Dynasty|Tribe|Clan",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "The Homeland",
+                "hint": "Place of origin — folk tunes, national identity",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Folk|Home|Land|Country|Nation|America|Irish|Scottish|English|African|Korean|Japanese|Chinese|Mexican|Armenian|Hebrew|Gaelic",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "The Bond",
+                "hint": "Love, devotion, togetherness",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Love|Heart|Together|Unite|Bond|Embrace|Wedding|Promise|Devotion|Forever|Eternal|Abide",
+                    case=False, regex=True)],
+            },
+            {
+                "label": "The Gathering",
+                "hint": "Community, celebration, reunion",
+                "match": lambda df: df[df["Title"].fillna("").str.contains(
+                    "Festival|Celebration|Gathering|Feast|Jubil|Fiesta|Carnival|Holiday|Reunion|Communit|Assembly|Congregation",
+                    case=False, regex=True)],
+            },
+        ],
+    },
 ]
 
 
@@ -1048,6 +1692,10 @@ def deal_theme_program(theme, source_df, grade_range=None):
     pool = source_df.copy()
     if grade_range and "Grade" in pool.columns:
         pool = pool[(pool["Grade"] >= grade_range[0]) & (pool["Grade"] <= grade_range[1])]
+
+    # Require meaningful professional endorsement for themed programs
+    if "Street Cred" in pool.columns:
+        pool = pool[pool["Street Cred"].fillna(0) >= 3]
 
     for slot in theme["slots"]:
         try:
