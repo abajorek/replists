@@ -2239,8 +2239,25 @@ def main():
             classic_themes = [t for t in THEME_DECKS if t.get("category") == "classic"]
             funny_themes = [t for t in THEME_DECKS if t.get("category") == "funny"]
 
-            vibe = st.radio("Vibe", ["Timeless Wisdom", "Unhinged"], horizontal=True, key="deck_vibe")
-            deck_pool = classic_themes if vibe == "Timeless Wisdom" else funny_themes
+            v1, v2 = st.columns(2)
+            with v1:
+                if st.button("🎓  Timeless Wisdom", key="vibe_classic",
+                             use_container_width=True,
+                             type="primary" if st.session_state.get("deck_vibe", "classic") == "classic" else "secondary"):
+                    st.session_state["deck_vibe"] = "classic"
+                    st.session_state.pop("deck_theme", None)
+                    st.rerun()
+            with v2:
+                if st.button("🤪  Unhinged", key="vibe_funny",
+                             use_container_width=True,
+                             type="primary" if st.session_state.get("deck_vibe") == "funny" else "secondary"):
+                    st.session_state["deck_vibe"] = "funny"
+                    st.session_state.pop("deck_theme", None)
+                    st.rerun()
+
+            vibe = st.session_state.get("deck_vibe", "classic")
+            deck_pool = classic_themes if vibe == "classic" else funny_themes
+            st.markdown(f"**I want my concert theme to be... {'timeless and meaningful' if vibe == 'classic' else 'absolutely unhinged'}.**")
             theme_names = [f"{t['emoji']}  {t['name']}" for t in deck_pool]
             chosen = st.selectbox("Pick your poison", theme_names, index=None,
                                   key="deck_theme", placeholder="Choose an aphorism...")
