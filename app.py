@@ -1151,26 +1151,34 @@ def main():
                 filtered = filtered.sort_values(sort_col, ascending=False, na_position="last")
 
         st.markdown(f"**{len(filtered):,}** pieces match your filters")
+        st.caption("Click a row to see details and add it to your program.")
 
-        st.dataframe(
+        event = st.dataframe(
             filtered[dcols].reset_index(drop=True),
             use_container_width=True,
             hide_index=True,
             height=500,
+            on_select="rerun",
+            selection_mode="single-row",
+            key="browse_df",
         )
 
-        # Detail view
-        if not filtered.empty:
-            with st.expander("Select a piece to learn more"):
-                options = filtered.apply(
-                    lambda r: f"{r['Title']}  —  {r['Composer']}" if pd.notna(r.get("Composer")) else str(r["Title"]),
-                    axis=1,
-                ).tolist()
-                choice = st.selectbox("Piece", options, index=None, key="detail_sel",
-                                      label_visibility="collapsed")
-                if choice is not None:
-                    row = filtered.iloc[options.index(choice)]
-                    render_piece_card(row, pairings_data, source, is_band)
+        # Detail view when a row is selected
+        selected_rows = event.selection.rows if event.selection else []
+        if selected_rows and not filtered.empty:
+            sel_idx = selected_rows[0]
+            if sel_idx < len(filtered):
+                row = filtered.iloc[sel_idx]
+                prog = st.session_state.get("program", [])
+                prog_titles = {
+                    (_norm_title(p.get("Title", "")), _norm_composer(p.get("Composer", "")))
+                    for p in prog
+                }
+                added = render_piece_card(row, pairings_data, source, is_band,
+                                          show_add=True, prog_titles=prog_titles)
+                if added:
+                    add_piece(row.to_dict())
+                    st.rerun()
 
     # ==================================================================
     # TAB 2: Program Builder (Wizard)
