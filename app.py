@@ -131,47 +131,14 @@ st.markdown("""
         font-weight: 600;
     }
 
-    /* Concert Themer — theme tiles */
-    .theme-tile {
-        background: #F7F4EE;
-        border: 2px solid #D6CEBB;
-        border-radius: 10px;
-        padding: 0.9rem 1rem;
-        margin: 0.3rem 0;
-        cursor: pointer;
-        transition: all 0.2s;
-        text-align: center;
-    }
-    .theme-tile:hover { border-color: #003831; background: #EFF3F0; }
-    .theme-tile-active {
-        background: #003831;
-        border-color: #003831;
-        color: white;
-    }
-    .theme-tile-active .theme-tile-name { color: white; }
-    .theme-tile-active .theme-tile-desc { color: #8FBFB0; }
-    .theme-tile-emoji { font-size: 1.5rem; margin-bottom: 0.2rem; }
-    .theme-tile-name {
-        font-family: 'Montserrat', sans-serif;
-        font-weight: 700;
-        font-size: 0.82rem;
-        color: #003831;
-        line-height: 1.2;
-    }
-    .theme-tile-desc {
-        font-size: 0.72rem;
-        color: #6B6B6B;
-        margin-top: 0.2rem;
-    }
-
-    /* Concert Themer — mind map branch */
+    /* Concert Themer — mind map */
     .themer-root {
         background: linear-gradient(135deg, #003831, #0A4A40);
         color: white;
-        border-radius: 12px;
+        border-radius: 12px 12px 0 0;
         padding: 1.2rem 1.5rem;
         text-align: center;
-        margin: 1rem 0;
+        margin: 1.5rem 0 0 0;
         border-bottom: 3px solid #C8962E;
     }
     .themer-root h3 {
@@ -188,30 +155,24 @@ st.markdown("""
     }
     .themer-branch {
         border-left: 3px solid #C8962E;
-        margin-left: 2rem;
-        padding-left: 1.5rem;
-        padding-top: 0.5rem;
-        padding-bottom: 0.2rem;
+        margin-left: 1.5rem;
+        padding-left: 1.2rem;
+        padding-top: 0;
+        padding-bottom: 0;
+    }
+    .themer-slot {
+        background: #F7F4EE;
+        border: 1px solid #D6CEBB;
+        border-radius: 8px;
+        padding: 0.8rem 1rem;
+        margin: 0.6rem 0;
         position: relative;
     }
-    .themer-branch::before {
+    .themer-slot::before {
         content: '';
         position: absolute;
-        left: -3px;
-        top: 0;
-        width: 3px;
-        height: 1.2rem;
-        background: #C8962E;
-    }
-    .themer-node {
-        position: relative;
-        margin-bottom: 1.5rem;
-    }
-    .themer-node::before {
-        content: '';
-        position: absolute;
-        left: -1.5rem;
-        top: 0.9rem;
+        left: -1.2rem;
+        top: 1.2rem;
         width: 1.2rem;
         height: 3px;
         background: #C8962E;
@@ -219,21 +180,43 @@ st.markdown("""
     .themer-slot-label {
         font-family: 'Montserrat', sans-serif;
         font-weight: 700;
-        font-size: 1rem;
+        font-size: 0.9rem;
         color: #003831;
         display: inline-block;
         background: #F0E9D8;
         border: 2px solid #C8962E;
         border-radius: 20px;
-        padding: 0.3rem 0.9rem;
-        margin-bottom: 0.3rem;
+        padding: 0.15rem 0.7rem;
     }
     .themer-slot-hint {
-        font-size: 0.82rem;
+        font-size: 0.78rem;
         color: #6B6B6B;
         font-style: italic;
-        margin-left: 0.5rem;
+        margin-left: 0.4rem;
     }
+    .themer-piece {
+        margin-top: 0.4rem;
+    }
+    .themer-piece-title {
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 700;
+        font-size: 1.05rem;
+        color: #003831;
+    }
+    .themer-piece-meta {
+        color: #6B6B6B;
+        font-size: 0.85rem;
+        margin-top: 0.1rem;
+    }
+    .themer-piece-stats {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.3rem 1.2rem;
+        margin-top: 0.3rem;
+        font-size: 0.8rem;
+        color: #4A4A4A;
+    }
+    .themer-piece-stats span { white-space: nowrap; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -2397,6 +2380,17 @@ def main():
             if chosen_idx is not None and chosen_idx < len(deck_pool):
                 theme = deck_pool[chosen_idx]
 
+                # Deal / reshuffle
+                if "deck_seed" not in st.session_state:
+                    st.session_state["deck_seed"] = 0
+                if "deck_slot_seeds" not in st.session_state:
+                    st.session_state["deck_slot_seeds"] = {}
+
+                base_seed = st.session_state["deck_seed"] + chosen_idx + (hash(vibe) % 1000)
+                slot_seeds = st.session_state["deck_slot_seeds"]
+                program = deal_theme_program(theme, deck_source, grade_filter,
+                                             base_seed=base_seed, slot_seeds=slot_seeds)
+
                 # Root node
                 st.markdown(
                     f'<div class="themer-root">'
@@ -2406,56 +2400,82 @@ def main():
                     unsafe_allow_html=True,
                 )
 
-                # Deal / reshuffle
-                if "deck_seed" not in st.session_state:
-                    st.session_state["deck_seed"] = 0
-                if "deck_slot_seeds" not in st.session_state:
-                    st.session_state["deck_slot_seeds"] = {}
-                if st.button("🔀  Reshuffle All", key="deck_reshuffle", type="secondary"):
-                    st.session_state["deck_seed"] += 1
-                    st.session_state["deck_slot_seeds"] = {}
-                    st.rerun()
-
-                base_seed = st.session_state["deck_seed"] + chosen_idx + (hash(vibe) % 1000)
-                slot_seeds = st.session_state["deck_slot_seeds"]
-                program = deal_theme_program(theme, deck_source, grade_filter,
-                                             base_seed=base_seed, slot_seeds=slot_seeds)
-
-                # Branches
+                # Branches — compact inline pieces
                 st.markdown('<div class="themer-branch">', unsafe_allow_html=True)
                 all_found = True
                 prog_dicts = []
                 for i, slot in enumerate(theme["slots"]):
                     piece = program[i]
-                    st.markdown(
-                        f'<div class="themer-node">'
-                        f'<span class="themer-slot-label">{slot["label"]}</span>'
-                        f'<span class="themer-slot-hint">{slot["hint"]}</span>'
-                        f'</div>',
-                        unsafe_allow_html=True,
-                    )
                     if piece is None:
-                        st.warning("No match found — try a wider grade range.")
+                        # Slot header + warning, all in one block
+                        st.markdown(
+                            f'<div class="themer-slot">'
+                            f'<span class="themer-slot-label">{slot["label"]}</span>'
+                            f'<span class="themer-slot-hint">{slot["hint"]}</span>'
+                            f'<div class="themer-piece" style="color:#888;font-style:italic;">'
+                            f'No match found — try a wider grade range.</div>'
+                            f'</div>',
+                            unsafe_allow_html=True,
+                        )
                         all_found = False
                     else:
                         prog_dicts.append(piece)
-                        row_series = pd.Series(piece)
-                        render_piece_card(row_series, None, deck_source, is_band_deck)
-                        if st.button("🔄 Swap this piece", key=f"swap_slot_{i}",
-                                     type="secondary"):
+                        title = piece.get("Title", "?")
+                        composer = piece.get("Composer", "")
+                        arranger = piece.get("Arranger", "")
+                        grade = piece.get("Grade", "?")
+                        arr_str = f" (arr. {arranger})" if pd.notna(arranger) and str(arranger).strip() else ""
+
+                        # Build compact stats
+                        stats = []
+                        bb = piece.get("Best Bet")
+                        if pd.notna(bb) and str(bb).strip():
+                            stats.append(f"<span><b>Rec:</b> {float(bb):.0f}/100</span>")
+                        mpa = piece.get("MPA Confidence")
+                        if pd.notna(mpa) and str(mpa).strip():
+                            stats.append(f"<span><b>MPA:</b> {float(mpa):.0f}/100</span>")
+                        sc = piece.get("Street Cred")
+                        if pd.notna(sc) and str(sc).strip():
+                            stats.append(f"<span><b>Cred:</b> {float(sc):.1f}</span>")
+                        cats = piece.get("Categories")
+                        if pd.notna(cats) and str(cats).strip():
+                            stats.append(f"<span><b>Style:</b> {cats}</span>")
+                        stats_html = " ".join(stats)
+
+                        st.markdown(
+                            f'<div class="themer-slot">'
+                            f'<span class="themer-slot-label">{slot["label"]}</span>'
+                            f'<span class="themer-slot-hint">{slot["hint"]}</span>'
+                            f'<div class="themer-piece">'
+                            f'<div class="themer-piece-title">{title}</div>'
+                            f'<div class="themer-piece-meta">{composer}{arr_str} · Grade {grade}</div>'
+                            f'<div class="themer-piece-stats">{stats_html}</div>'
+                            f'</div></div>',
+                            unsafe_allow_html=True,
+                        )
+                        if st.button("🔄 Swap", key=f"swap_slot_{i}"):
                             slot_seeds[i] = slot_seeds.get(i, 0) + 1
                             st.session_state["deck_slot_seeds"] = slot_seeds
                             st.rerun()
 
                 st.markdown('</div>', unsafe_allow_html=True)
 
+                # Reshuffle + export
+                st.markdown("")
+                btn_cols = st.columns([1, 1, 2])
+                with btn_cols[0]:
+                    if st.button("🔀 Reshuffle All", key="deck_reshuffle"):
+                        st.session_state["deck_seed"] += 1
+                        st.session_state["deck_slot_seeds"] = {}
+                        st.rerun()
+
                 if all_found and prog_dicts:
-                    st.markdown("")
-                    ec1, ec2 = st.columns(2)
-                    ec1.download_button("Download as CSV", data=export_csv(prog_dicts),
-                                        file_name="themed_program.csv", mime="text/csv")
-                    ec2.download_button("Download program sheet", data=export_text(prog_dicts),
-                                        file_name="themed_program.txt", mime="text/plain")
+                    with btn_cols[1]:
+                        st.download_button("📄 CSV", data=export_csv(prog_dicts),
+                                           file_name="themed_program.csv", mime="text/csv")
+                    with btn_cols[2]:
+                        st.download_button("📋 Program Sheet", data=export_text(prog_dicts),
+                                           file_name="themed_program.txt", mime="text/plain")
 
     # ==================================================================
     # TAB 4: About the Data
