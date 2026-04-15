@@ -130,6 +130,110 @@ st.markdown("""
         font-family: 'Montserrat', sans-serif;
         font-weight: 600;
     }
+
+    /* Concert Themer — theme tiles */
+    .theme-tile {
+        background: #F7F4EE;
+        border: 2px solid #D6CEBB;
+        border-radius: 10px;
+        padding: 0.9rem 1rem;
+        margin: 0.3rem 0;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-align: center;
+    }
+    .theme-tile:hover { border-color: #003831; background: #EFF3F0; }
+    .theme-tile-active {
+        background: #003831;
+        border-color: #003831;
+        color: white;
+    }
+    .theme-tile-active .theme-tile-name { color: white; }
+    .theme-tile-active .theme-tile-desc { color: #8FBFB0; }
+    .theme-tile-emoji { font-size: 1.5rem; margin-bottom: 0.2rem; }
+    .theme-tile-name {
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 700;
+        font-size: 0.82rem;
+        color: #003831;
+        line-height: 1.2;
+    }
+    .theme-tile-desc {
+        font-size: 0.72rem;
+        color: #6B6B6B;
+        margin-top: 0.2rem;
+    }
+
+    /* Concert Themer — mind map branch */
+    .themer-root {
+        background: linear-gradient(135deg, #003831, #0A4A40);
+        color: white;
+        border-radius: 12px;
+        padding: 1.2rem 1.5rem;
+        text-align: center;
+        margin: 1rem 0;
+        border-bottom: 3px solid #C8962E;
+    }
+    .themer-root h3 {
+        color: white;
+        margin: 0;
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 800;
+    }
+    .themer-root .themer-desc {
+        color: #8FBFB0;
+        font-style: italic;
+        font-size: 0.85rem;
+        margin-top: 0.3rem;
+    }
+    .themer-branch {
+        border-left: 3px solid #C8962E;
+        margin-left: 2rem;
+        padding-left: 1.5rem;
+        padding-top: 0.5rem;
+        padding-bottom: 0.2rem;
+        position: relative;
+    }
+    .themer-branch::before {
+        content: '';
+        position: absolute;
+        left: -3px;
+        top: 0;
+        width: 3px;
+        height: 1.2rem;
+        background: #C8962E;
+    }
+    .themer-node {
+        position: relative;
+        margin-bottom: 1.5rem;
+    }
+    .themer-node::before {
+        content: '';
+        position: absolute;
+        left: -1.5rem;
+        top: 0.9rem;
+        width: 1.2rem;
+        height: 3px;
+        background: #C8962E;
+    }
+    .themer-slot-label {
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 700;
+        font-size: 1rem;
+        color: #003831;
+        display: inline-block;
+        background: #F0E9D8;
+        border: 2px solid #C8962E;
+        border-radius: 20px;
+        padding: 0.3rem 0.9rem;
+        margin-bottom: 0.3rem;
+    }
+    .themer-slot-hint {
+        font-size: 0.82rem;
+        color: #6B6B6B;
+        font-style: italic;
+        margin-left: 0.5rem;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -2204,8 +2308,7 @@ def main():
     # ==================================================================
     with tab3:
         st.markdown("### Concert Themer")
-        st.markdown("Pick an aphorism. We'll deal you a thematic concert program from the database. "
-                    "Hit **Deal again** to reshuffle.")
+        st.caption("Pick an aphorism. We'll build you a thematic concert program.")
 
         db_deck = st.radio("Database", ["Band", "Orchestra"], horizontal=True, key="deck_db")
         is_band_deck = db_deck == "Band"
@@ -2239,66 +2342,97 @@ def main():
             classic_themes = [t for t in THEME_DECKS if t.get("category") == "classic"]
             funny_themes = [t for t in THEME_DECKS if t.get("category") == "funny"]
 
+            # --- Vibe selector ---
+            st.markdown("")
             v1, v2 = st.columns(2)
             with v1:
                 if st.button("🎓  Timeless Wisdom", key="vibe_classic",
                              use_container_width=True,
                              type="primary" if st.session_state.get("deck_vibe", "classic") == "classic" else "secondary"):
                     st.session_state["deck_vibe"] = "classic"
-                    st.session_state.pop("deck_theme", None)
+                    st.session_state.pop("deck_chosen_theme", None)
                     st.rerun()
             with v2:
                 if st.button("🤪  Unhinged", key="vibe_funny",
                              use_container_width=True,
                              type="primary" if st.session_state.get("deck_vibe") == "funny" else "secondary"):
                     st.session_state["deck_vibe"] = "funny"
-                    st.session_state.pop("deck_theme", None)
+                    st.session_state.pop("deck_chosen_theme", None)
                     st.rerun()
 
             vibe = st.session_state.get("deck_vibe", "classic")
             deck_pool = classic_themes if vibe == "classic" else funny_themes
-            st.markdown(f"**I want my concert theme to be... {'timeless and meaningful' if vibe == 'classic' else 'absolutely unhinged'}.**")
-            theme_names = [f"{t['emoji']}  {t['name']}" for t in deck_pool]
-            chosen = st.selectbox("Pick your poison", theme_names, index=None,
-                                  key="deck_theme", placeholder="Choose an aphorism...")
 
-            if chosen is not None:
-                theme_idx = theme_names.index(chosen)
-                theme = deck_pool[theme_idx]
+            # --- Theme tiles ---
+            st.markdown("")
+            cols_per_row = 3
+            for row_start in range(0, len(deck_pool), cols_per_row):
+                row_themes = deck_pool[row_start:row_start + cols_per_row]
+                cols = st.columns(cols_per_row)
+                for ci, theme in enumerate(row_themes):
+                    with cols[ci]:
+                        tidx = row_start + ci
+                        is_active = st.session_state.get("deck_chosen_theme") == tidx
+                        if st.button(
+                            f"{theme['emoji']}\n{theme['name']}",
+                            key=f"theme_tile_{vibe}_{tidx}",
+                            use_container_width=True,
+                            type="primary" if is_active else "secondary",
+                        ):
+                            st.session_state["deck_chosen_theme"] = tidx
+                            st.session_state["deck_seed"] = st.session_state.get("deck_seed", 0)
+                            st.rerun()
 
-                st.markdown(f"### {theme['emoji']} {theme['name']}")
-                st.caption(theme["description"])
+            # --- Mind-map program display ---
+            chosen_idx = st.session_state.get("deck_chosen_theme")
+            if chosen_idx is not None and chosen_idx < len(deck_pool):
+                theme = deck_pool[chosen_idx]
 
-                # Deal button / initial deal
+                # Root node
+                st.markdown(
+                    f'<div class="themer-root">'
+                    f'<h3>{theme["emoji"]} {theme["name"]}</h3>'
+                    f'<div class="themer-desc">{theme["description"]}</div>'
+                    f'</div>',
+                    unsafe_allow_html=True,
+                )
+
+                # Deal / reshuffle
                 if "deck_seed" not in st.session_state:
                     st.session_state["deck_seed"] = 0
-
-                if st.button("Deal again", key="deck_reshuffle", type="secondary"):
+                if st.button("🔀  Reshuffle", key="deck_reshuffle", type="secondary"):
                     st.session_state["deck_seed"] += 1
+                    st.rerun()
 
                 import random
-                random.seed(st.session_state["deck_seed"] + theme_idx)
-
+                random.seed(st.session_state["deck_seed"] + chosen_idx + (hash(vibe) % 1000))
                 program = deal_theme_program(theme, deck_source, grade_filter)
 
-                st.markdown("---")
+                # Branches
+                st.markdown('<div class="themer-branch">', unsafe_allow_html=True)
                 all_found = True
                 prog_dicts = []
                 for i, slot in enumerate(theme["slots"]):
                     piece = program[i]
-                    st.markdown(f'**{slot["label"]}** — *{slot["hint"]}*')
+                    st.markdown(
+                        f'<div class="themer-node">'
+                        f'<span class="themer-slot-label">{slot["label"]}</span>'
+                        f'<span class="themer-slot-hint">{slot["hint"]}</span>'
+                        f'</div>',
+                        unsafe_allow_html=True,
+                    )
                     if piece is None:
-                        st.warning("No match found for this slot. Try a wider grade range or a different database.")
+                        st.warning("No match found — try a wider grade range.")
                         all_found = False
                     else:
                         prog_dicts.append(piece)
                         row_series = pd.Series(piece)
                         render_piece_card(row_series, None, deck_source, is_band_deck)
-                    st.markdown("")
+
+                st.markdown('</div>', unsafe_allow_html=True)
 
                 if all_found and prog_dicts:
-                    st.markdown("---")
-                    st.markdown("### Export this ridiculous program")
+                    st.markdown("")
                     ec1, ec2 = st.columns(2)
                     ec1.download_button("Download as CSV", data=export_csv(prog_dicts),
                                         file_name="themed_program.csv", mime="text/csv")
