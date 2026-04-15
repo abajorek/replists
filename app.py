@@ -801,13 +801,14 @@ def export_text(prog):
 
 
 # ---------------------------------------------------------------------------
-# Shuffle the Deck — thematic program generator
+# Theme Yo Concert — thematic program generator
 # ---------------------------------------------------------------------------
 
 THEME_DECKS = [
     {
         "name": "Something Old, Something New, Something Borrowed, Something Blue",
         "emoji": "💍",
+        "category": "classic",
         "description": "The wedding toast of concert programs.",
         "slots": [
             {
@@ -845,6 +846,7 @@ THEME_DECKS = [
     {
         "name": "Don't Whiz on the Electric Fence",
         "emoji": "⚡",
+        "category": "funny",
         "description": "A Ren & Stimpy life lesson, in three movements.",
         "slots": [
             {
@@ -873,6 +875,7 @@ THEME_DECKS = [
     {
         "name": "I Told You Not to Eat That",
         "emoji": "🤢",
+        "category": "funny",
         "description": "Every potluck has consequences.",
         "slots": [
             {
@@ -915,6 +918,7 @@ THEME_DECKS = [
     {
         "name": "Hold My Beer",
         "emoji": "🍺",
+        "category": "funny",
         "description": "The last words before every great story.",
         "slots": [
             {
@@ -957,6 +961,7 @@ THEME_DECKS = [
     {
         "name": "Famous Last Words",
         "emoji": "💀",
+        "category": "funny",
         "description": "\"What's the worst that could happen?\"",
         "slots": [
             {
@@ -992,6 +997,7 @@ THEME_DECKS = [
     {
         "name": "That's Not a Knife... THIS Is a Knife",
         "emoji": "🔪",
+        "category": "funny",
         "description": "Crocodile Dundee's guide to dynamic contrast.",
         "slots": [
             {
@@ -1027,6 +1033,7 @@ THEME_DECKS = [
     {
         "name": "The Floor Is Lava",
         "emoji": "🌋",
+        "category": "funny",
         "description": "The childhood game that prepared you for concert programming.",
         "slots": [
             {
@@ -1069,6 +1076,7 @@ THEME_DECKS = [
     {
         "name": "What Happens in Vegas Stays in Vegas",
         "emoji": "🎰",
+        "category": "funny",
         "description": "Sin City's concert programming philosophy.",
         "slots": [
             {
@@ -1111,6 +1119,7 @@ THEME_DECKS = [
     {
         "name": "If It Ain't Broke, Don't Fix It",
         "emoji": "🔧",
+        "category": "funny",
         "description": "But it IS broke. And you made it worse.",
         "slots": [
             {
@@ -1153,6 +1162,7 @@ THEME_DECKS = [
     {
         "name": "The Good, the Bad, and the Ugly",
         "emoji": "🤠",
+        "category": "funny",
         "description": "A Sergio Leone triple feature for your concert hall.",
         "slots": [
             {
@@ -1179,6 +1189,7 @@ THEME_DECKS = [
     {
         "name": "What Doesn't Kill You Makes You Stronger",
         "emoji": "💪",
+        "category": "classic",
         "description": "Nietzsche's pep talk, scored for wind ensemble.",
         "slots": [
             {
@@ -1207,6 +1218,7 @@ THEME_DECKS = [
     {
         "name": "Lions and Tigers and Bears, Oh My!",
         "emoji": "🦁",
+        "category": "funny",
         "description": "Follow the yellow brick road through the animal kingdom.",
         "slots": [
             {
@@ -1235,6 +1247,7 @@ THEME_DECKS = [
     {
         "name": "Red Sky at Night, Sailor's Delight",
         "emoji": "🌅",
+        "category": "classic",
         "description": "The old mariner's weather forecast.",
         "slots": [
             {
@@ -1263,6 +1276,7 @@ THEME_DECKS = [
     {
         "name": "If You Can't Stand the Heat, Get Out of the Kitchen",
         "emoji": "🔥",
+        "category": "funny",
         "description": "Harry Truman's concert program.",
         "slots": [
             {
@@ -1291,6 +1305,7 @@ THEME_DECKS = [
     {
         "name": "The Grass Is Always Greener",
         "emoji": "🌿",
+        "category": "classic",
         "description": "A pastoral program about longing for what's on the other side.",
         "slots": [
             {
@@ -1319,6 +1334,7 @@ THEME_DECKS = [
     {
         "name": "A Journey of a Thousand Miles Begins with a Single Step",
         "emoji": "👣",
+        "category": "classic",
         "description": "Lao Tzu's travel guide, in five movements.",
         "slots": [
             {
@@ -1361,6 +1377,7 @@ THEME_DECKS = [
     {
         "name": "Every Cloud Has a Silver Lining",
         "emoji": "⛅",
+        "category": "classic",
         "description": "Optimism, scored for concert band.",
         "slots": [
             {
@@ -1396,6 +1413,7 @@ THEME_DECKS = [
     {
         "name": "Still Waters Run Deep",
         "emoji": "🌊",
+        "category": "classic",
         "description": "Quiet intensity and hidden power.",
         "slots": [
             {
@@ -1424,6 +1442,7 @@ THEME_DECKS = [
     {
         "name": "Rome Wasn't Built in a Day",
         "emoji": "🏛️",
+        "category": "classic",
         "description": "An empire in four movements.",
         "slots": [
             {
@@ -1459,6 +1478,7 @@ THEME_DECKS = [
     {
         "name": "Actions Speak Louder Than Words",
         "emoji": "📢",
+        "category": "classic",
         "description": "Less talk, more band.",
         "slots": [
             {
@@ -1494,6 +1514,7 @@ THEME_DECKS = [
     {
         "name": "All That Glitters Is Not Gold",
         "emoji": "✨",
+        "category": "classic",
         "description": "Shakespeare's metallurgy lesson.",
         "slots": [
             {
@@ -1529,6 +1550,7 @@ THEME_DECKS = [
     {
         "name": "When It Rains, It Pours",
         "emoji": "🌧️",
+        "category": "classic",
         "description": "Morton Salt's concert philosophy — everything at once.",
         "slots": [
             {
@@ -1571,6 +1593,7 @@ THEME_DECKS = [
     {
         "name": "Where There's Smoke, There's Fire",
         "emoji": "💨",
+        "category": "classic",
         "description": "An investigation in four acts.",
         "slots": [
             {
@@ -1606,6 +1629,7 @@ THEME_DECKS = [
     {
         "name": "The Early Bird Gets the Worm",
         "emoji": "🐦",
+        "category": "classic",
         "description": "A full day of music, dawn to dark.",
         "slots": [
             {
@@ -1648,6 +1672,7 @@ THEME_DECKS = [
     {
         "name": "Blood Is Thicker Than Water",
         "emoji": "🩸",
+        "category": "classic",
         "description": "Family ties and ancestral roots.",
         "slots": [
             {
@@ -1755,7 +1780,7 @@ def main():
     pairings_data = load_pairings()
 
     tab1, tab2, tab3, tab4, tab5 = st.tabs(["Browse Repertoire", "Build a Program",
-                                            "Shuffle the Deck", "About the Data",
+                                            "Theme Yo Concert", "About the Data",
                                             "The Tuba of Fate"])
 
     # ==================================================================
@@ -2175,10 +2200,10 @@ def main():
                                                 file_name="concert_program.txt", mime="text/plain")
 
     # ==================================================================
-    # TAB 3: Shuffle the Deck
+    # TAB 3: Theme Yo Concert
     # ==================================================================
     with tab3:
-        st.markdown("### Shuffle the Deck")
+        st.markdown("### Theme Yo Concert")
         st.markdown("Pick an aphorism. We'll deal you a thematic concert program from the database. "
                     "Hit **Deal again** to reshuffle.")
 
@@ -2210,14 +2235,19 @@ def main():
             else:
                 grade_filter = None
 
-            # Pick a theme
-            theme_names = [f"{t['emoji']}  {t['name']}" for t in THEME_DECKS]
+            # Pick a theme — split into classic and funny
+            classic_themes = [t for t in THEME_DECKS if t.get("category") == "classic"]
+            funny_themes = [t for t in THEME_DECKS if t.get("category") == "funny"]
+
+            vibe = st.radio("Vibe", ["Timeless Wisdom", "Unhinged"], horizontal=True, key="deck_vibe")
+            deck_pool = classic_themes if vibe == "Timeless Wisdom" else funny_themes
+            theme_names = [f"{t['emoji']}  {t['name']}" for t in deck_pool]
             chosen = st.selectbox("Pick your poison", theme_names, index=None,
                                   key="deck_theme", placeholder="Choose an aphorism...")
 
             if chosen is not None:
                 theme_idx = theme_names.index(chosen)
-                theme = THEME_DECKS[theme_idx]
+                theme = deck_pool[theme_idx]
 
                 st.markdown(f"### {theme['emoji']} {theme['name']}")
                 st.caption(theme["description"])
