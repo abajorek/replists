@@ -136,7 +136,7 @@ st.markdown("""
         background: linear-gradient(135deg, #003831, #0A4A40);
         color: white;
         border-radius: 12px 12px 0 0;
-        padding: 1.2rem 1.5rem;
+        padding: 1rem 1.5rem;
         text-align: center;
         margin: 1.5rem 0 0 0;
         border-bottom: 3px solid #C8962E;
@@ -146,75 +146,90 @@ st.markdown("""
         margin: 0;
         font-family: 'Montserrat', sans-serif;
         font-weight: 800;
+        font-size: 1.2rem;
     }
     .themer-root .themer-desc {
         color: #8FBFB0;
         font-style: italic;
-        font-size: 0.85rem;
-        margin-top: 0.3rem;
+        font-size: 0.82rem;
+        margin-top: 0.2rem;
     }
     .themer-branch {
         border-left: 3px solid #C8962E;
         margin-left: 1.5rem;
-        padding-left: 1.2rem;
+        padding-left: 0;
         padding-top: 0;
-        padding-bottom: 0;
+        padding-bottom: 0.5rem;
     }
     .themer-slot {
-        background: #F7F4EE;
-        border: 1px solid #D6CEBB;
-        border-radius: 8px;
-        padding: 0.8rem 1rem;
-        margin: 0.6rem 0;
         position: relative;
+        margin: 0;
+        padding: 0.7rem 0 0.7rem 1.2rem;
+        border-bottom: 1px solid #E8E2D6;
     }
+    .themer-slot:last-child { border-bottom: none; }
     .themer-slot::before {
         content: '';
         position: absolute;
-        left: -1.2rem;
-        top: 1.2rem;
+        left: 0;
+        top: 1.3rem;
         width: 1.2rem;
         height: 3px;
         background: #C8962E;
     }
+    .themer-slot-header {
+        display: flex;
+        align-items: baseline;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
     .themer-slot-label {
         font-family: 'Montserrat', sans-serif;
         font-weight: 700;
-        font-size: 0.9rem;
+        font-size: 0.85rem;
         color: #003831;
-        display: inline-block;
         background: #F0E9D8;
         border: 2px solid #C8962E;
         border-radius: 20px;
-        padding: 0.15rem 0.7rem;
+        padding: 0.1rem 0.65rem;
+        white-space: nowrap;
+    }
+    .themer-arrow {
+        color: #C8962E;
+        font-size: 0.9rem;
+        font-weight: bold;
     }
     .themer-slot-hint {
         font-size: 0.78rem;
-        color: #6B6B6B;
+        color: #888;
         font-style: italic;
-        margin-left: 0.4rem;
     }
     .themer-piece {
-        margin-top: 0.4rem;
+        display: flex;
+        align-items: baseline;
+        gap: 0.6rem;
+        margin-top: 0.25rem;
+        padding-left: 0.2rem;
+        flex-wrap: wrap;
     }
     .themer-piece-title {
         font-family: 'Montserrat', sans-serif;
         font-weight: 700;
-        font-size: 1.05rem;
+        font-size: 1rem;
         color: #003831;
     }
     .themer-piece-meta {
         color: #6B6B6B;
-        font-size: 0.85rem;
-        margin-top: 0.1rem;
+        font-size: 0.82rem;
     }
     .themer-piece-stats {
         display: flex;
         flex-wrap: wrap;
-        gap: 0.3rem 1.2rem;
-        margin-top: 0.3rem;
-        font-size: 0.8rem;
-        color: #4A4A4A;
+        gap: 0.15rem 0.8rem;
+        margin-top: 0.15rem;
+        padding-left: 0.2rem;
+        font-size: 0.75rem;
+        color: #777;
     }
     .themer-piece-stats span { white-space: nowrap; }
 </style>
@@ -2407,13 +2422,15 @@ def main():
                 for i, slot in enumerate(theme["slots"]):
                     piece = program[i]
                     if piece is None:
-                        # Slot header + warning, all in one block
                         st.markdown(
                             f'<div class="themer-slot">'
+                            f'<div class="themer-slot-header">'
                             f'<span class="themer-slot-label">{slot["label"]}</span>'
+                            f'<span class="themer-arrow">→</span>'
                             f'<span class="themer-slot-hint">{slot["hint"]}</span>'
-                            f'<div class="themer-piece" style="color:#888;font-style:italic;">'
-                            f'No match found — try a wider grade range.</div>'
+                            f'</div>'
+                            f'<div class="themer-piece" style="color:#999;font-style:italic;">'
+                            f'No match — try a wider grade range</div>'
                             f'</div>',
                             unsafe_allow_html=True,
                         )
@@ -2426,31 +2443,31 @@ def main():
                         grade = piece.get("Grade", "?")
                         arr_str = f" (arr. {arranger})" if pd.notna(arranger) and str(arranger).strip() else ""
 
-                        # Build compact stats
                         stats = []
                         bb = piece.get("Best Bet")
                         if pd.notna(bb) and str(bb).strip():
-                            stats.append(f"<span><b>Rec:</b> {float(bb):.0f}/100</span>")
+                            stats.append(f"<span>Rec {float(bb):.0f}</span>")
                         mpa = piece.get("MPA Confidence")
                         if pd.notna(mpa) and str(mpa).strip():
-                            stats.append(f"<span><b>MPA:</b> {float(mpa):.0f}/100</span>")
+                            stats.append(f"<span>MPA {float(mpa):.0f}</span>")
                         sc = piece.get("Street Cred")
                         if pd.notna(sc) and str(sc).strip():
-                            stats.append(f"<span><b>Cred:</b> {float(sc):.1f}</span>")
-                        cats = piece.get("Categories")
-                        if pd.notna(cats) and str(cats).strip():
-                            stats.append(f"<span><b>Style:</b> {cats}</span>")
-                        stats_html = " ".join(stats)
+                            stats.append(f"<span>Cred {float(sc):.1f}</span>")
+                        stats_html = " · ".join(s.replace("<span>", "").replace("</span>", "") for s in stats)
 
                         st.markdown(
                             f'<div class="themer-slot">'
+                            f'<div class="themer-slot-header">'
                             f'<span class="themer-slot-label">{slot["label"]}</span>'
+                            f'<span class="themer-arrow">→</span>'
                             f'<span class="themer-slot-hint">{slot["hint"]}</span>'
+                            f'</div>'
                             f'<div class="themer-piece">'
-                            f'<div class="themer-piece-title">{title}</div>'
-                            f'<div class="themer-piece-meta">{composer}{arr_str} · Grade {grade}</div>'
-                            f'<div class="themer-piece-stats">{stats_html}</div>'
-                            f'</div></div>',
+                            f'<span class="themer-piece-title">{title}</span>'
+                            f'<span class="themer-piece-meta">{composer}{arr_str} · Gr. {grade}</span>'
+                            f'</div>'
+                            f'<div class="themer-piece-stats"><span>{stats_html}</span></div>'
+                            f'</div>',
                             unsafe_allow_html=True,
                         )
                         if st.button("🔄 Swap", key=f"swap_slot_{i}"):
