@@ -801,7 +801,7 @@ def export_text(prog):
 
 
 # ---------------------------------------------------------------------------
-# Theme Yo Concert — thematic program generator
+# Concert Themer — thematic program generator
 # ---------------------------------------------------------------------------
 
 THEME_DECKS = [
@@ -1780,7 +1780,7 @@ def main():
     pairings_data = load_pairings()
 
     tab1, tab2, tab3, tab4, tab5 = st.tabs(["Browse Repertoire", "Build a Program",
-                                            "Theme Yo Concert", "About the Data",
+                                            "Concert Themer", "About the Data",
                                             "The Tuba of Fate"])
 
     # ==================================================================
@@ -2200,10 +2200,10 @@ def main():
                                                 file_name="concert_program.txt", mime="text/plain")
 
     # ==================================================================
-    # TAB 3: Theme Yo Concert
+    # TAB 3: Concert Themer
     # ==================================================================
     with tab3:
-        st.markdown("### Theme Yo Concert")
+        st.markdown("### Concert Themer")
         st.markdown("Pick an aphorism. We'll deal you a thematic concert program from the database. "
                     "Hit **Deal again** to reshuffle.")
 
