@@ -1812,8 +1812,11 @@ THEME_DECKS = [
 ]
 
 
-def deal_theme_program(theme, source_df, grade_range=None):
-    """Pick one random piece per slot from matching pieces."""
+def deal_theme_program(theme, source_df, grade_range=None, base_seed=0, slot_seeds=None):
+    """Pick one random piece per slot from matching pieces.
+
+    slot_seeds: optional dict {slot_index: seed_offset} for per-slot rerolls.
+    """
     import random
     program = []
     used_titles = set()
@@ -1826,7 +1829,13 @@ def deal_theme_program(theme, source_df, grade_range=None):
     if "Street Cred" in pool.columns:
         pool = pool[pool["Street Cred"].fillna(0) >= 3]
 
-    for slot in theme["slots"]:
+    if slot_seeds is None:
+        slot_seeds = {}
+
+    for i, slot in enumerate(theme["slots"]):
+        # Each slot gets its own deterministic seed
+        random.seed(base_seed + i * 9999 + slot_seeds.get(i, 0) * 7)
+
         try:
             matches = slot["match"](pool)
         except Exception:
@@ -2400,13 +2409,17 @@ def main():
                 # Deal / reshuffle
                 if "deck_seed" not in st.session_state:
                     st.session_state["deck_seed"] = 0
-                if st.button("🔀  Reshuffle", key="deck_reshuffle", type="secondary"):
+                if "deck_slot_seeds" not in st.session_state:
+                    st.session_state["deck_slot_seeds"] = {}
+                if st.button("🔀  Reshuffle All", key="deck_reshuffle", type="secondary"):
                     st.session_state["deck_seed"] += 1
+                    st.session_state["deck_slot_seeds"] = {}
                     st.rerun()
 
-                import random
-                random.seed(st.session_state["deck_seed"] + chosen_idx + (hash(vibe) % 1000))
-                program = deal_theme_program(theme, deck_source, grade_filter)
+                base_seed = st.session_state["deck_seed"] + chosen_idx + (hash(vibe) % 1000)
+                slot_seeds = st.session_state["deck_slot_seeds"]
+                program = deal_theme_program(theme, deck_source, grade_filter,
+                                             base_seed=base_seed, slot_seeds=slot_seeds)
 
                 # Branches
                 st.markdown('<div class="themer-branch">', unsafe_allow_html=True)
@@ -2428,6 +2441,11 @@ def main():
                         prog_dicts.append(piece)
                         row_series = pd.Series(piece)
                         render_piece_card(row_series, None, deck_source, is_band_deck)
+                        if st.button("🔄 Swap this piece", key=f"swap_slot_{i}",
+                                     type="secondary"):
+                            slot_seeds[i] = slot_seeds.get(i, 0) + 1
+                            st.session_state["deck_slot_seeds"] = slot_seeds
+                            st.rerun()
 
                 st.markdown('</div>', unsafe_allow_html=True)
 
