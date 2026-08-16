@@ -244,6 +244,18 @@ BAND_FILE = os.path.join(DATA_DIR, "WindBand_Repertoire_Database.xlsx")
 ORCH_FILE = os.path.join(DATA_DIR, "Orchestra_Repertoire_Database.xlsx")
 PAIRINGS_FILE = os.path.join(DATA_DIR, "pairings.json")
 
+# Parsing the workbooks costs several seconds, which the first visitor after a
+# restart pays. build_cache.py writes Parquet copies at deploy time; they load
+# ~30x faster. The .xlsx files remain the editable source of truth.
+BAND_CACHE = os.path.join(DATA_DIR, "cache", "band.parquet")
+ORCH_CACHE = os.path.join(DATA_DIR, "cache", "orchestra.parquet")
+
+
+def _fresh_cache(cache_path: str, source_path: str) -> bool:
+    """Use the cache only when it is present and not older than its source."""
+    return (os.path.exists(cache_path)
+            and os.path.getmtime(cache_path) >= os.path.getmtime(source_path))
+
 # ---------------------------------------------------------------------------
 # Plain-language sort options
 # ---------------------------------------------------------------------------
@@ -327,10 +339,14 @@ ORCH_DISPLAY = ["Title", "Composer", "Arranger", "Grade", "Best Bet", "MPA Confi
 
 @st.cache_data(show_spinner="Loading band repertoire...")
 def load_band() -> pd.DataFrame:
+    if _fresh_cache(BAND_CACHE, BAND_FILE):
+        return pd.read_parquet(BAND_CACHE)
     return pd.read_excel(BAND_FILE, sheet_name="Band Originals")
 
 @st.cache_data(show_spinner="Loading orchestra repertoire...")
 def load_orchestra() -> pd.DataFrame:
+    if _fresh_cache(ORCH_CACHE, ORCH_FILE):
+        return pd.read_parquet(ORCH_CACHE)
     return pd.read_excel(ORCH_FILE, sheet_name="Orchestra Repertoire")
 
 @st.cache_data(show_spinner=False)

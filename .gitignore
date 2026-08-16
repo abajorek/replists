@@ -35,3 +35,6 @@ Thumbs.db
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Generated at build time from the .xlsx workbooks
+cache/

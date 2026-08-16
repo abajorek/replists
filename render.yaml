@@ -6,7 +6,7 @@ services:
     region: oregon
     branch: main
     autoDeploy: true
-    buildCommand: pip install -r requirements.txt
+    buildCommand: pip install -r requirements.txt && python build_cache.py
     startCommand: >-
       streamlit run app.py
       --server.port $PORT
