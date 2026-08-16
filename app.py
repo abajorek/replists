@@ -4,6 +4,7 @@ Moneyband
 
 import streamlit as st
 import pandas as pd
+import hashlib
 import os
 import re
 import json
@@ -245,16 +246,33 @@ ORCH_FILE = os.path.join(DATA_DIR, "Orchestra_Repertoire_Database.xlsx")
 PAIRINGS_FILE = os.path.join(DATA_DIR, "pairings.json")
 
 # Parsing the workbooks costs several seconds, which the first visitor after a
-# restart pays. build_cache.py writes Parquet copies at deploy time; they load
-# ~30x faster. The .xlsx files remain the editable source of truth.
-BAND_CACHE = os.path.join(DATA_DIR, "cache", "band.parquet")
-ORCH_CACHE = os.path.join(DATA_DIR, "cache", "orchestra.parquet")
+# restart pays. build_cache.py writes Parquet copies that load ~30x faster and
+# are committed alongside the workbooks. The .xlsx files remain the editable
+# source of truth — edit one and the app falls back to it until the cache is
+# rebuilt, so stale data is never served.
+CACHE_DIR = os.path.join(DATA_DIR, "cache")
+BAND_CACHE = os.path.join(CACHE_DIR, "band.parquet")
+ORCH_CACHE = os.path.join(CACHE_DIR, "orchestra.parquet")
+CACHE_MANIFEST = os.path.join(CACHE_DIR, "manifest.json")
 
 
 def _fresh_cache(cache_path: str, source_path: str) -> bool:
-    """Use the cache only when it is present and not older than its source."""
-    return (os.path.exists(cache_path)
-            and os.path.getmtime(cache_path) >= os.path.getmtime(source_path))
+    """Match the cache against its source by content hash. Mtimes are useless
+    here: the caches are committed, and git stamps a clone with checkout time."""
+    if not (os.path.exists(cache_path) and os.path.exists(CACHE_MANIFEST)):
+        return False
+    try:
+        with open(CACHE_MANIFEST, encoding="utf-8") as fh:
+            entry = json.load(fh).get(os.path.basename(cache_path))
+        if not entry:
+            return False
+        sha = hashlib.sha256()
+        with open(source_path, "rb") as fh:
+            for chunk in iter(lambda: fh.read(1 << 20), b""):
+                sha.update(chunk)
+        return sha.hexdigest() == entry.get("sha256")
+    except (OSError, ValueError):
+        return False
 
 # ---------------------------------------------------------------------------
 # Plain-language sort options
