@@ -48,6 +48,19 @@ STATE_COLS = [
 
 STATE_LIST_WEIGHT = 0.01  # Street Cred contribution per state list
 
+# Best Bet is a stored column, not computed at render time, so it goes stale the
+# moment Street Cred moves. Recovered by exact fit against the pre-refresh
+# workbook (max error 1e-14 across all 18,649 rows):
+#
+#   Best Bet = 0.6 * MPA Confidence (0 when absent) + BEST_BET_CRED_WEIGHT * Street Cred
+#
+# The weight is 40/15.48 — Street Cred rescaled to contribute 40 points at the
+# 15.48 ceiling the original scoring used. Keeping that constant fixed is what
+# makes PMEA count exactly as much as any other state list: only Street Cred
+# itself changes, and every state contributes to it at the same 0.01 rate.
+BEST_BET_MPA_WEIGHT = 0.6
+BEST_BET_CRED_WEIGHT = 40 / 15.48
+
 
 # ---------------------------------------------------------------------------
 # Normalization
@@ -218,7 +231,15 @@ def main() -> int:
     new_cred = (band["Street Cred"]
                 + STATE_LIST_WEIGHT * (new_count - old_count)).round(4)
 
+    # Recomputed from scratch rather than adjusted by a delta, so re-running
+    # this script is idempotent. Left unrounded to match the precision the
+    # column already carries (values like 85.27054263565893).
+    new_best_bet = (BEST_BET_MPA_WEIGHT * band["MPA Confidence"].fillna(0)
+                    + BEST_BET_CRED_WEIGHT * new_cred)
+
+    moved = (new_best_bet - band["Best Bet"]).abs() > 1e-9
     print(f"State List Count changed on {int((new_count != old_count).sum())} rows")
+    print(f"Best Bet changed on {int(moved.sum())} rows")
 
     if args.dry_run:
         print("\n--dry-run: workbook not modified")
@@ -238,6 +259,7 @@ def main() -> int:
     pa_col = header["PA"]
     count_col = header["State List Count"]
     cred_col = header["Street Cred"]
+    best_col = header["Best Bet"]
 
     def lookup_grade(keys):
         grades = [grade_by_key[k] for k in keys if k in grade_by_key]
@@ -249,12 +271,14 @@ def main() -> int:
         ws.cell(row=row, column=pa_col, value=bool(new_pa.iat[i]))
         ws.cell(row=row, column=count_col, value=int(new_count.iat[i]))
         ws.cell(row=row, column=cred_col, value=float(new_cred.iat[i]))
+        ws.cell(row=row, column=best_col, value=float(new_best_bet.iat[i]))
         grade = pmea_grade.iat[i]
         ws.cell(row=row, column=grade_col,
                 value=None if pd.isna(grade) else int(grade))
 
     wb.save(BAND_FILE)
-    print(f"\nUpdated {BAND_FILE} (PA, PMEA Grade, State List Count, Street Cred)")
+    print(f"\nUpdated {BAND_FILE} "
+          f"(PA, PMEA Grade, State List Count, Street Cred, Best Bet)")
     return 0
 
 
